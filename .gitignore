@@ -1,0 +1,29 @@
+# Ignore build artifacts
+build/
+*.o
+*.obj
+
+# Ignore executable files
+*.exe
+*.out
+*.app
+
+# Ignore editor-specific files
+.idea/
+
+# Ignore system-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore any local configuration files
+*.config
+
+# Ignore compiled libraries
+*.a
+*.so
+*.dll
+
+# Ignore temporary files
+*.tmp
+*.log
+*.bak

@@ -1,0 +1,36 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "(lldb) Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/game.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "build",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for lldb",
+                    "text": "settings set target.pretty-printing true",
+                    "ignoreFailures": true
+                }
+            ],
+            "windows": {
+                "MIMode": "lldb",
+                "miDebuggerPath": "C:/LLVM/bin/lldb.exe",
+            },
+            "linux": {
+                "MIMode": "lldb",
+                "miDebuggerPath": "/usr/bin/lldb"
+            },
+            "osx": {
+                "MIMode": "lldb",
+                "miDebuggerPath": "/usr/bin/lldb"
+            }
+        }
+    ]
+}

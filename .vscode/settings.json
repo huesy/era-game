@@ -1,0 +1,16 @@
+{
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "files.eol": "\n",
+    "editor.folding": true,
+    "files.associations": {
+        "stdlib.h": "c"
+    },
+    "[c]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+}
