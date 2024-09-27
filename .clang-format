@@ -1,12 +1,11 @@
 # BasedOnStyle: LLVM
-# IndentWidth: 2
-# UseTab: Never
-# ColumnLimit: 80
-# AllowShortIfStatementsOnASingleLine: false
-# BreakBeforeBraces: Allman
-# AlignAfterOpenBracket: BlockIndent
-# BreakConstructorInitializersBeforeComma: true
-# BinPackParameters: false
-# AllowAllParametersOfDeclarationOnNextLine: false
-# BreakAfterReturnType: Automatic
-# PenaltyReturnTypeOnItsOwnLine: 2000
+IndentWidth: 2
+UseTab: Never
+ColumnLimit: 80
+BreakBeforeBraces: Allman
+AlignAfterOpenBracket: AlwaysBreak
+BinPackArguments: false
+AllowAllArgumentsOnNextLine: false
+BinPackParameters: false
+AllowAllParametersOfDeclarationOnNextLine: false
+Cpp11BracedListStyle: true

@@ -1,7 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-// Engine initialization function.
-int engine_init();
+void engineInit();
 
 #endif // ENGINE_H

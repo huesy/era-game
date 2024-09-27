@@ -1,11 +1,16 @@
 {
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
+    "editor.rulers": [
+        80,
+    ],
     "files.eol": "\n",
     "editor.folding": true,
     "files.associations": {
         "stdlib.h": "c"
     },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
     "[c]": {
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "ms-vscode.cpptools"

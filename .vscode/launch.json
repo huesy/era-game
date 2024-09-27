@@ -2,35 +2,25 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(lldb) Launch",
+            "name": "Debug Game (Clang)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/game.exe",
+            "program": "${workspaceFolder}/build/bin/game.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "preLaunchTask": "build",
+            "MIMode": "lldb",
+            "miDebuggerPath": "C:/Program Files/LLVM/bin/lldb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for lldb",
-                    "text": "settings set target.pretty-printing true",
+                    "text": "-enable-pretty-printing",
                     "ignoreFailures": true
                 }
             ],
-            "windows": {
-                "MIMode": "lldb",
-                "miDebuggerPath": "C:/LLVM/bin/lldb.exe",
-            },
-            "linux": {
-                "MIMode": "lldb",
-                "miDebuggerPath": "/usr/bin/lldb"
-            },
-            "osx": {
-                "MIMode": "lldb",
-                "miDebuggerPath": "/usr/bin/lldb"
-            }
+            "preLaunchTask": "make game"
         }
     ]
 }
