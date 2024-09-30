@@ -1,67 +1,149 @@
-BUILD_DIR := bin
-OBJ_DIR := obj
+# ======================================================================
+# Makefile for Building 'engine' Library and 'game' Executable
+# ======================================================================
 
-# Needs to be set by the caller.
-# ASSEMBLY := engine
+# ----------------------------
+# 1. Detect Operating System
+# ----------------------------
+UNAME_S := $(shell uname -s)
 
-DEFINES := -DERA_EXPORT
-BASE_COMPILER_FLAGS := -Wall -Wextra -Werror -Wstrict-prototypes -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-value
-
-# Detect OS and architecture.
-ifeq ($(OS),Windows_NT)
-	# WIN32
-	BUILD_PLATFORM := windows
-	EXTENSION := .dll
-	COMPILER_FLAGS := $(BASE_COMPILER_FLAGS) -fdeclspec
-	INCLUDE_FLAGS := -I$(ASSEMBLY)\src $(ADDL_INC_FLAGS)
-	LINKER_FLAGS := -shared -L$(OBJ_DIR)\$(ASSEMBLY) -L.\$(BUILD_DIR) $(ADDL_LINK_FLAGS)
-	DEFINES += -D_CRT_SECURE_NO_WARNINGS -DUNICODE
-
-	# Make does not offer a recursive wildcard function, so we need to define it.
-	# This is a Windows-specific implementation.
-	rwildcard = $(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
-	DIR := $(subst /,\,${CURDIR})
-
-	# .c files
-	SRC_FILES := $(call rwildcard,$(ASSEMBLY)/,*.c)
-	# Directories with .h files
-	DIRECTORIES := \$(ASSEMBLY)\src $(subst $(DIR),,$(shell dir $(ASSEMBLY)\src /S /AD /B | findstr /i src))
-	OBJ_FILES := $(SRC_FILES:%=$(OBJ_DIR)/%.o)
-	ifeq ($(PROCESSOR_ARCHITEW6432),AMD64)
-		# AMD64
-	else
-		ifeq ($(PROCESSOR_ARCHITECTURE),AMD64)
-			# AMD64
-		endif
-		ifeq ($(PROCESSOR_ARCHITECTURE),x86)
-			# IA32
-		endif
-	endif
+ifeq ($(UNAME_S),Linux)
+    OS := LINUX
+    SHARED_LIB_EXT := so
+    SHARED_LIB_FLAGS := -shared
+    LIB_PREFIX := lib
+else ifeq ($(UNAME_S),Darwin)
+    OS := MAC
+    SHARED_LIB_EXT := dylib
+    SHARED_LIB_FLAGS := -shared
+    LIB_PREFIX := lib
+else ifeq ($(OS),Windows_NT)
+    OS := WINDOWS
+    SHARED_LIB_EXT := dll
+    SHARED_LIB_FLAGS := -shared
+    LIB_PREFIX :=
 else
-	UNAME_S := $(shell uname -s)
-	ifeq ($(UNAME_S),Linux)
-		# LINUX
-		BUILD_PLATFORM := linux
-		EXTENSION := .so
-		# Note: -fPIC is required for shared libraries.
-		#       -fvisibility=hidden is used to hide symbols by default and only export the ones we want.
-		COMPILER_FLAGS := $(BASE_COMPILER_FLAGS) -fPIC -fvisibility=hidden
-		INCLUDE_FLAGS := -I$(ASSEMBLY)/src - $(ADDL_INC_FLAGS)
-		# Note: --no-undefined and --no-allow-shlib-undefined ensure that symbols linking against are resolved.
-		# These are linux-specific, as the default behaviour is the opposite of this, allowing code to compile
-		# here that would not on other platforms from not being exported (i.e. Windows)
-		# Discovered the solution here for this: https://github.com/ziglang/zig/issues/8180
-		LINKER_FLAGS := -Wl,--no-undefined,--no-allow-shlib-undefined -shared -lxcb -lX11 -lX11-xcb
-		LINKER_FLAGS := -shared -L$(OBJ_DIR)/$(ASSEMBLY) -L./$(BUILD_DIR) $(ADDL_LINK_FLAGS)
-		DEFINES += -D_GNU_SOURCE
-	else
-		ifeq ($(UNAME_S),Darwin)
-			# OSX
-			BUILD_PLATFORM := osx
-			EXTENSION := .dylib
-			COMPILER_FLAGS := -Wall -Wextra -Werror -fPIC -Wstrict-prototypes -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-value
-			INCLUDE_FLAGS := -I$(ASSEMBLY)/src $(ADDL_INC_FLAGS)
-			LINKER_FLAGS := -shared -L$(OBJ_DIR)/$(ASSEMBLY) -L./$(BUILD_DIR) $(ADDL_LINK_FLAGS)
-			DEFINES += -D_GNU_SOURCE
-		endif
-	endif
+    OS := UNKNOWN
+    SHARED_LIB_EXT := so
+    SHARED_LIB_FLAGS := -shared
+    LIB_PREFIX := lib
+endif
+
+# ----------------------------
+# 2. Compiler and Tools
+# ----------------------------
+CC := clang
+
+# Compiler Flags
+CFLAGS := -Wall -Wextra -fPIC -Iengine/include -Igame/include -MMD -MP
+
+# Linker Flags
+LDFLAGS :=
+
+# ----------------------------
+# 3. Directories and Files
+# ----------------------------
+# Build Directories
+BUILD_DIR := build
+ENGINE_BUILD_DIR := $(BUILD_DIR)/engine
+GAME_BUILD_DIR := $(BUILD_DIR)/game
+LIB_DIR := $(BUILD_DIR)/lib
+BIN_DIR := $(BUILD_DIR)/bin
+
+# Source Directories
+ENGINE_SRC_DIR := engine/src
+GAME_SRC_DIR := game/src
+
+# Include Directories
+ENGINE_INCLUDE_DIR := engine/include
+GAME_INCLUDE_DIR := game/include
+
+# Library and Executable Names
+ENGINE_LIB := $(LIB_DIR)/$(LIB_PREFIX)engine.$(SHARED_LIB_EXT)
+GAME_EXE := $(BIN_DIR)/game$(if $(filter WINDOWS,$(OS)),.exe,)
+
+# ----------------------------
+# 4. Source Files
+# ----------------------------
+# Function to recursively find all .c files
+define find_sources
+	$(shell find $(1) -name '*.c')
+endef
+
+# Find all source files for engine and game
+ENGINE_SRC_FILES := $(call find_sources,$(ENGINE_SRC_DIR))
+GAME_SRC_FILES := $(call find_sources,$(GAME_SRC_DIR))
+
+# Object Files
+ENGINE_OBJ_FILES := $(patsubst $(ENGINE_SRC_DIR)/%.c, $(ENGINE_BUILD_DIR)/%.o, $(ENGINE_SRC_FILES))
+GAME_OBJ_FILES := $(patsubst $(GAME_SRC_DIR)/%.c, $(GAME_BUILD_DIR)/%.o, $(GAME_SRC_FILES))
+
+# ----------------------------
+# 5. Default Target
+# ----------------------------
+.PHONY: all
+all: $(GAME_EXE)
+
+# ----------------------------
+# 6. Build Game Executable
+# ----------------------------
+$(GAME_EXE): $(GAME_OBJ_FILES) $(ENGINE_LIB)
+	@echo "Linking executable $@"
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -o $@ $(GAME_OBJ_FILES) -L$(LIB_DIR) -lengine $(LDFLAGS)
+
+# ----------------------------
+# 7. Build Engine Shared Library
+# ----------------------------
+$(ENGINE_LIB): $(ENGINE_OBJ_FILES)
+	@echo "Creating shared library $@"
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(SHARED_LIB_FLAGS) -o $@ $(ENGINE_OBJ_FILES)
+
+# ----------------------------
+# 8. Compile Engine Source Files
+# ----------------------------
+$(ENGINE_BUILD_DIR)/%.o: $(ENGINE_SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# ----------------------------
+# 9. Compile Game Source Files
+# ----------------------------
+$(GAME_BUILD_DIR)/%.o: $(GAME_SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# ----------------------------
+# 10. Dependency Files
+# ----------------------------
+# Include the dependency files generated by the compiler
+-include $(ENGINE_OBJ_FILES:.o=.d)
+-include $(GAME_OBJ_FILES:.o=.d)
+
+# ----------------------------
+# 11. Clean Target
+# ----------------------------
+.PHONY: clean
+clean:
+	@echo "Cleaning build artifacts..."
+ifeq ($(OS), WINDOWS)
+	@rmdir /S /Q $(BUILD_DIR) 2>nul || echo "No build directory to remove."
+else
+	@rm -rf $(BUILD_DIR)
+endif
+
+# ----------------------------
+# 12. Help Target
+# ----------------------------
+.PHONY: help
+help:
+	@echo "Makefile Targets:"
+	@echo "  all      - Build the 'game' executable"
+	@echo "  clean    - Remove all build artifacts"
+	@echo "  help     - Show this help message"
+
+# ----------------------------
+# 13. Phony Targets
+# ----------------------------
+.PHONY: all clean help

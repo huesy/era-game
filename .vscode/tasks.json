@@ -2,73 +2,72 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Build Engine",
             "type": "shell",
-            "label": "clang build active file",
-            "command": "clang",
-            "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
+            "command": "make",
+            "args": ["engine"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build"
+            "detail": "Builds the engine library using the Makefile."
         },
         {
+            "label": "Build Game",
             "type": "shell",
-            "label": "make engine",
-            "command": "",
-            "windows": {
-                "command": "if (Get-Command mingw32-make -ErrorAction SilentlyContinue) { mingw32-make CC=clang engine } else { make CC=clang engine }"
-            },
-            "linux": {
-                "command": "make CC=clang engine"
-            },
-            "osx": {
-                "command": "make CC=clang engine"
+            "command": "make",
+            "args": ["game"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build"
+            "detail": "Builds the game executable using the Makefile."
         },
         {
+            "label": "Build Tests",
             "type": "shell",
-            "label": "make game",
-            "command": "",
-            "windows": {
-                "command": "if (Get-Command mingw32-make -ErrorAction SilentlyContinue) { mingw32-make CC=clang game } else { make CC=clang game }"
-            },
-            "linux": {
-                "command": "make CC=clang game"
-            },
-            "osx": {
-                "command": "make CC=clang game"
+            "command": "make",
+            "args": ["tests"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
             },
             "problemMatcher": [
                 "$gcc"
             ],
-            "group": "build"
+            "detail": "Builds the tests executable using the Makefile."
         },
         {
+            "label": "Build All",
             "type": "shell",
-            "label": "make clean",
-            "command": "",
-            "windows": {
-                "command": "if (Get-Command mingw32-make -ErrorAction SilentlyContinue) { mingw32-make clean } else { make clean }"
+            "command": "make",
+            "args": ["all"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
             },
-            "linux": {
-                "command": "make clean"
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Builds all components using the Makefile."
+        },
+        {
+            "label": "Clean",
+            "type": "shell",
+            "command": "make",
+            "args": ["clean"],
+            "group": {
+                "kind": "build",
+                "isDefault": false
             },
-            "osx": {
-                "command": "make clean"
-            },
-            "problemMatcher": []
+            "problemMatcher": [],
+            "detail": "Cleans the build artifacts using the Makefile."
         }
     ]
 }

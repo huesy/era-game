@@ -2,25 +2,42 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Game (Clang)",
-            "type": "cppdbg",
+            "name": "Debug Game",
+            "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/game.exe",
+            "program": "${workspaceFolder}/build/bin/game",
             "args": [],
-            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
-            "environment": [],
+            "preLaunchTask": "Build Game",
+            "stopAtEntry": false,
             "externalConsole": false,
             "MIMode": "lldb",
-            "miDebuggerPath": "C:/Program Files/LLVM/bin/lldb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for lldb",
-                    "text": "-enable-pretty-printing",
+                    "text": "command script import /usr/local/opt/python/lib/python3.9/site-packages/pwndbg/commands.py",
                     "ignoreFailures": true
                 }
-            ],
-            "preLaunchTask": "make game"
+            ]
+        },
+        {
+            "name": "Debug Tests",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/tests",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build Tests",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for lldb",
+                    "text": "command script import /usr/local/opt/python/lib/python3.9/site-packages/pwndbg/commands.py",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

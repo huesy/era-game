@@ -1,0 +1,78 @@
+# Compiler and flags
+CC := clang
+CFLAGS := -Wall -Wextra -O2 -Iengine/include -Igame/include -Itests/include
+
+# Directories
+BUILD_DIR := build
+BUILD_LIB := $(BUILD_DIR)/lib
+BUILD_BIN := $(BUILD_DIR)/bin
+BUILD_OBJ := $(BUILD_DIR)/obj
+
+ENGINE_DIR := engine
+GAME_DIR := game
+TESTS_DIR := tests
+
+# Source files
+ENGINE_SRC := $(shell find $(ENGINE_DIR)/src -name '*.c')
+GAME_SRC := $(shell find $(GAME_DIR)/src -name '*.c')
+TESTS_SRC := $(shell find $(TESTS_DIR)/src -name '*.c')
+
+# Object files
+ENGINE_OBJ := $(patsubst $(ENGINE_DIR)/src/%.c,$(BUILD_OBJ)/engine/%.o,$(ENGINE_SRC))
+GAME_OBJ := $(patsubst $(GAME_DIR)/src/%.c,$(BUILD_OBJ)/game/%.o,$(GAME_SRC))
+TESTS_OBJ := $(patsubst $(TESTS_DIR)/src/%.c,$(BUILD_OBJ)/tests/%.o,$(TESTS_SRC))
+
+# Library
+LIBENGINE := $(BUILD_LIB)/libengine.a
+
+# Binaries
+GAME_BIN := $(BUILD_BIN)/game
+TESTS_BIN := $(BUILD_BIN)/tests
+
+# Default target
+.PHONY: all engine game tests clean
+
+all: engine game tests
+
+# Engine target
+engine: $(LIBENGINE)
+
+# Game target
+game: engine $(GAME_BIN)
+
+# Tests target
+tests: engine $(TESTS_BIN)
+
+# Compile engine objects
+$(BUILD_OBJ)/$(ENGINE_DIR)/%.o: $(ENGINE_DIR)/src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile game objects
+$(BUILD_OBJ)/$(GAME_DIR)/%.o: $(GAME_DIR)/src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compile tests objects
+$(BUILD_OBJ)/$(TESTS_DIR)/%.o: $(TESTS_DIR)/src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Create engine library
+$(LIBENGINE): $(ENGINE_OBJ)
+	@mkdir -p $(BUILD_LIB)
+	ar rcs $@ $^
+
+# Link game binary
+$(GAME_BIN): $(GAME_OBJ) $(LIBENGINE)
+	@mkdir -p $(BUILD_BIN)
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Link tests binary
+$(TESTS_BIN): $(TESTS_OBJ) $(LIBENGINE)
+	@mkdir -p $(BUILD_BIN)
+	$(CC) $(CFLAGS) $^ -o $@
+
+# Clean build artifacts
+clean:
+	rm -rf $(BUILD_DIR)
