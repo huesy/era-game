@@ -1,6 +1,6 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-void engineInit();
+void EngineInit(void);
 
 #endif // ENGINE_H

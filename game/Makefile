@@ -1,7 +1,13 @@
-# Engine Makefile
+# Game Makefile
 
 # Include common configuration
 include ../config.mk
+
+# --------------------------------------------------------------------
+# Target executable
+# --------------------------------------------------------------------
+TARGET = game$(EXE_EXT)
+BIN_TARGET = $(BIN_DIR)/$(TARGET)
 
 # --------------------------------------------------------------------
 # Directories
@@ -9,24 +15,19 @@ include ../config.mk
 SRC_DIR = src
 INCLUDE_DIR = include
 SRC_DIRS = $(SRC_DIR)
-INCLUDE_DIRS = $(INCLUDE_DIR)
-
-# --------------------------------------------------------------------
-# Target shared library
-# --------------------------------------------------------------------
-LIB_NAME = libengine$(SHARED_LIB_EXT)
-LIB_TARGET = $(LIB_DIR)/$(LIB_NAME)
+INCLUDE_DIRS = $(INCLUDE_DIR) ../engine/include
 
 # --------------------------------------------------------------------
 # Sources and objects
 # --------------------------------------------------------------------
 SOURCES = $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
-OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/engine/%.o,$(SOURCES))
+OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/game/%.o,$(SOURCES))
 
 # --------------------------------------------------------------------
 # Compiler flags
 # --------------------------------------------------------------------
 IFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
+LFLAGS += -L$(LIB_DIR) -lengine
 
 # --------------------------------------------------------------------
 # Phony targets
@@ -36,29 +37,29 @@ IFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
 # --------------------------------------------------------------------
 # Default target
 # --------------------------------------------------------------------
-all: $(LIB_TARGET)
-	$(ECHO) "Engine shared library built at $(LIB_TARGET)"
+all: $(BIN_TARGET)
+	$(ECHO) "Game executable built at $(BIN_TARGET)"
 
 # --------------------------------------------------------------------
-# Build the shared library
+# Build executable
 # --------------------------------------------------------------------
-$(LIB_TARGET): $(OBJECTS)
-	$(ECHO) "Creating engine shared library..."
+$(BIN_TARGET): $(OBJECTS) $(LIB_DIR)/libengine$(SHARED_LIB_EXT)
+	$(ECHO) "Linking game executable..."
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(SHARED_LIB_FLAG) -o $@ $^ $(LFLAGS)
+	@$(CC) $(CFLAGS) $(IFLAGS) $^ -o $@ $(LFLAGS)
 
 # --------------------------------------------------------------------
 # Compile source files into object files
 # --------------------------------------------------------------------
-$(OBJ_DIR)/engine/%.o: $(SRC_DIR)/%.c
+$(OBJ_DIR)/game/%.o: $(SRC_DIR)/%.c
 	$(ECHO) "Compiling $<..."
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) -fPIC -c $< -o $@
+	@$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
 
 # --------------------------------------------------------------------
 # Clean target
 # --------------------------------------------------------------------
 clean:
-	$(ECHO) "Cleaning engine build artifacts..."
-	@$(RM) $(OBJ_DIR)/engine
-	@$(RM) $(LIB_TARGET)
+	$(ECHO) "Cleaning game build artifacts..."
+	@$(RM) $(OBJ_DIR)/game
+	@$(RM) $(BIN_TARGET)

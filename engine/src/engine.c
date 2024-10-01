@@ -2,7 +2,7 @@
 #include "math/math.h"
 #include <stdio.h>
 
-void engineInit() {
+void EngineInit(void) {
     // Initialize the engine here.
     printf("Engine initialized.\n");
     MathInit();
