@@ -7,7 +7,8 @@
     "files.eol": "\n",
     "editor.folding": true,
     "files.associations": {
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "stdio.h": "c"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "ms-vscode.cpptools",

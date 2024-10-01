@@ -1,4 +1,4 @@
-#include "math.h"
+#include "math/math.h"
 #include <stdio.h>
 
 void MathInit(void) {
