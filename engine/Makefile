@@ -1,67 +1,101 @@
-# Engine Makefile
+ASSEMBLY := engine
+LIB_TYPE ?= static
 
-# Include common configuration
-include ../config.mk
-include ../config.lib.mk
+CC = @clang
+CFLAGS := -Wall -Wextra -Werror -Wpedantic
+LDFLAGS :=
 
-# --------------------------------------------------------------------
 # Directories
-# --------------------------------------------------------------------
-SRC_DIR := src
-INCLUDE_DIR := include
-SRC_DIRS := $(call fixpath,$(SRC_DIR))
-INCLUDE_DIRS := $(call fixpath,$(INCLUDE_DIR))
+SRCDIR = src
+INCDIR = include
+BUILDDIR = build
+OBJDIR = $(BUILDDIR)/obj
+DEPDIR = $(BUILDDIR)/dep
 
-# --------------------------------------------------------------------
-# Target shared library
-# --------------------------------------------------------------------
-LIB_NAME := libengine$(LIB_EXT)
-LIB_TARGET := $(call fixpath,$(LIB_DIR)/$(LIB_NAME))
+# Find all C source files and generate corresponding object files and dependencies
+SRC = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
+OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
+DEPS = $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SRC))
 
-# --------------------------------------------------------------------
-# Sources and objects
-# --------------------------------------------------------------------
-SOURCES := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
-OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/engine/%.o,$(SOURCES))
-DEPS := $(OBJECTS:.o=.d)
+LOGFILE = $(BUILDDIR)/build_log.txt
 
-# --------------------------------------------------------------------
-# Compiler flags
-# --------------------------------------------------------------------
-IFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
+# Detect platform
+ifeq ($(OS), Windows_NT)
+    PLATFORM := windows
+    MKDIR = @if not exist "$(subst /,\\,$(1))" mkdir "$(subst /,\\,$(1))"
+    RM := rmdir /S /Q
+    ifeq ($(LIB_TYPE),static)
+        # No static library, using object files for static linking
+        EXTENSION := .o
+        TARGET := $(OBJ)
+    else
+        EXTENSION := .dll
+        SHARED_FLAG := -shared
+        TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
+    endif
+else
+    OS := $(shell uname -s)
+    ifeq ($(OS), Darwin)
+        PLATFORM := macos
+        MKDIR := mkdir -p
+        RM := rm -rf
+        CFLAGS += -fPIC
+        ifeq ($(LIB_TYPE),static)
+            # No static library, using object files for static linking
+            EXTENSION := .o
+            TARGET := $(OBJ)
+        else
+            EXTENSION := .dylib
+            SHARED_FLAG := -dynamiclib
+            TARGET := $(BUILDDIR)/lib$(ASSEMBLY)$(EXTENSION)
+        endif
+    else ifeq ($(OS), Linux)
+        PLATFORM := linux
+        MKDIR := mkdir -p
+        RM := rm -rf
+        CFLAGS += -fPIC
+        ifeq ($(LIB_TYPE),static)
+            # No static library, using object files for static linking
+            EXTENSION := .o
+            TARGET := $(OBJ)
+        else
+            EXTENSION := .so
+            SHARED_FLAG := -shared
+            TARGET := $(BUILDDIR)/lib$(ASSEMBLY)$(EXTENSION)
+        endif
+    else
+        $(error Unsupported OS)
+    endif
+endif
 
-# --------------------------------------------------------------------
-# Phony targets
-# --------------------------------------------------------------------
-.PHONY: all clean
+# Ensure subdirectories are created
+DIRS = $(sort $(dir $(OBJ)) $(dir $(DEPS)))
 
-# --------------------------------------------------------------------
-# Default target
-# --------------------------------------------------------------------
-all: $(LIB_TARGET)
-	@echo Engine shared library built at $(LIB_TARGET)
+all: $(TARGET)
 
-# --------------------------------------------------------------------
-# Build the shared library
-# --------------------------------------------------------------------
-$(LIB_TARGET): $(OBJECTS)
-	@echo  - Creating engine shared library...
-	@$(call MKDIR_P,$(@D))
-	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
+# Create object files from source files and generate dependencies
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@echo Compiling $<...
+	$(call MKDIR,$(dir $@))
+	$(CC) $(CFLAGS) -I$(INCDIR) -MMD -MP -c $< -o $@
 
-# --------------------------------------------------------------------
-# Compile source files into object files and generate dependencies
-# --------------------------------------------------------------------
-$(call fixpath,$(OBJ_DIR)/engine/%.o): $(call fixpath,$(SRC_DIR)/%.c)
-	@echo  - Compiling $<...
-	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) $(DEPFLAGS) -c $< -o $@
+# Build the dynamic library
+ifeq ($(LIB_TYPE),dynamic)
+$(TARGET): $(OBJ)
+	@echo Linking dynamic library $(TARGET)...
+	$(call MKDIR,$(BUILDDIR))
+	$(CC) $(OBJ) $(SHARED_FLAG) -o $(TARGET)
+	@echo Compiled $(TARGET) as a $(LIB_TYPE) library with flags: $(CFLAGS) $(SHARED_FLAG) > $(LOGFILE)
+endif
 
--include $(DEPS)
-
-# --------------------------------------------------------------------
-# Clean target
-# --------------------------------------------------------------------
+# Clean method
 clean:
-	@echo --- Cleaning engine... ---
-	@$(RM) -r $(call fixpath,$(OBJ_DIR)/engine) $(LIB_TARGET)
+	@echo Cleaning $(BUILDDIR)...
+ifeq ($(PLATFORM),windows)
+	@if exist $(BUILDDIR) $(RM) $(BUILDDIR)
+else
+	@$(RM) $(BUILDDIR)
+endif
+
+# Include the dependency files to ensure proper recompilation on header changes
+-include $(DEPS)

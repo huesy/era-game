@@ -1,68 +1,99 @@
-# Game Makefile
+ASSEMBLY := game
+# Default to static, can be changed to 'dynamic'
+LIB_TYPE ?= static
 
-# Include common configuration
-include ../config.mk
-include ../config.exe.mk
+CC = @clang
+CFLAGS := -Wall -Wextra -Werror -Wpedantic
+LDFLAGS :=
 
-# --------------------------------------------------------------------
-# Target executable
-# --------------------------------------------------------------------
-TARGET := game$(EXE_EXT)
-BIN_TARGET := $(call fixpath,$(BIN_DIR)/$(TARGET))
-
-# --------------------------------------------------------------------
 # Directories
-# --------------------------------------------------------------------
-SRC_DIR := src
-INCLUDE_DIR := include
-SRC_DIRS := $(call fixpath,$(SRC_DIR))
-INCLUDE_DIRS := $(call fixpath,$(INCLUDE_DIR)) ../engine/include
+SRCDIR = src
+INCDIR = include
+BUILDDIR = build
+OBJDIR = $(BUILDDIR)/obj
+DEPDIR = $(BUILDDIR)/dep
 
-# --------------------------------------------------------------------
-# Sources and objects
-# --------------------------------------------------------------------
-SOURCES := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
-OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(call fixpath,$(OBJ_DIR)/game/%.o),$(SOURCES))
-DEPS := $(OBJECTS:.o=.d)
+# Paths to the engine object files and include directory
+ENGINE_OBJDIR = ../engine/build/obj
+ENGINE_INCDIR = ../engine/include
+ENGINE_OBJ = $(wildcard $(ENGINE_OBJDIR)/**/*.o) $(wildcard $(ENGINE_OBJDIR)/*.o)
 
-# --------------------------------------------------------------------
-# Compiler flags
-# --------------------------------------------------------------------
-IFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
-LFLAGS += -L$(LIB_DIR) -lengine
+# Paths to the engine dynamic library
+ENGINE_LIBDIR = ../engine/build
+# For Linux (example)
+ENGINE_LIB := $(ENGINE_LIBDIR)/libengine.so
+ifeq ($(OS), Windows_NT)
+    ENGINE_LIB := $(ENGINE_LIBDIR)/engine.dll
+else ifeq ($(OS), Darwin)
+    ENGINE_LIB := $(ENGINE_LIBDIR)/libengine.dylib
+endif
 
-# --------------------------------------------------------------------
-# Phony targets
-# --------------------------------------------------------------------
-.PHONY: all clean
+# Find all C source files and generate corresponding object files and dependencies
+SRC = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
+OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
+DEPS = $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SRC))
 
-# --------------------------------------------------------------------
-# Default target
-# --------------------------------------------------------------------
-all: $(BIN_TARGET)
-	@echo Game executable built at $(BIN_TARGET)
+LOGFILE = $(BUILDDIR)/build_log.txt
 
-# --------------------------------------------------------------------
-# Build executable
-# --------------------------------------------------------------------
-$(BIN_TARGET): $(OBJECTS) $(call fixpath,$(LIB_DIR)/libengine$(SHARED_LIB_EXT))
-	@echo --- Linking game executable... ---
-	@$(call MKDIR_P,$(@D))
-	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
+# Detect platform
+ifeq ($(OS), Windows_NT)
+    PLATFORM := windows
+    MKDIR = @if not exist "$(subst /,\\,$(1))" mkdir "$(subst /,\\,$(1))"
+    RM := rmdir /S /Q
+    EXTENSION := .exe
+    TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
+else
+    OS := $(shell uname -s)
+    ifeq ($(OS), Darwin)
+        PLATFORM := macos
+        MKDIR := mkdir -p
+        RM := rm -rf
+        EXTENSION :=
+        TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
+    else ifeq ($(OS), Linux)
+        PLATFORM := linux
+        MKDIR := mkdir -p
+        RM := rm -rf
+        EXTENSION :=
+        TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
+    else
+        $(error Unsupported OS)
+    endif
+endif
 
-# --------------------------------------------------------------------
-# Compile source files into object files and generate dependencies
-# --------------------------------------------------------------------
-$(call fixpath,$(OBJ_DIR)/game/%.o): $(call fixpath,$(SRC_DIR)/%.c)
-	@echo --- Compiling $<... ---
-	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) $(DEPFLAGS) -c $< -o $@
+# Ensure subdirectories are created
+DIRS = $(sort $(dir $(OBJ)) $(dir $(DEPS)))
 
--include $(DEPS)
+all: $(TARGET)
 
-# --------------------------------------------------------------------
-# Clean target
-# --------------------------------------------------------------------
+# Create object files from source files and generate dependencies
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	@echo Compiling $<...
+	$(call MKDIR,$(dir $@))
+	$(CC) $(CFLAGS) -I$(INCDIR) -I$(ENGINE_INCDIR) -MMD -MP -c $< -o $@
+
+# Link the game executable with engine object files (static) or engine library (dynamic)
+ifeq ($(LIB_TYPE),static)
+$(TARGET): $(OBJ)
+	@echo Linking static game executable $(TARGET)...
+	$(call MKDIR,$(BUILDDIR))
+	$(CC) $(OBJ) $(ENGINE_OBJ) -o $(TARGET)
+else
+$(TARGET): $(OBJ)
+	@echo Linking dynamic game executable $(TARGET)...
+	$(call MKDIR,$(BUILDDIR))
+	$(CC) $(OBJ) -L$(ENGINE_LIBDIR) -lengine $(LDFLAGS) -o $(TARGET)
+endif
+	@echo Compiled $(TARGET) with flags: $(CFLAGS) $(LDFLAGS) > $(LOGFILE)
+
+# Clean method
 clean:
-	@echo --- Cleaning game ---
-	@$(RM) -r $(call fixpath,$(OBJ_DIR)/game) $(BIN_TARGET)
+	@echo Cleaning $(BUILDDIR)...
+ifeq ($(PLATFORM),windows)
+	@if exist $(BUILDDIR) $(RM) $(BUILDDIR)
+else
+	@$(RM) $(BUILDDIR)
+endif
+
+# Include the dependency files to ensure proper recompilation on header changes
+-include $(DEPS)
