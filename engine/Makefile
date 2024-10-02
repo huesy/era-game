@@ -2,26 +2,28 @@
 
 # Include common configuration
 include ../config.mk
+include ../config.lib.mk
 
 # --------------------------------------------------------------------
 # Directories
 # --------------------------------------------------------------------
-SRC_DIR = src
-INCLUDE_DIR = include
-SRC_DIRS = $(SRC_DIR)
-INCLUDE_DIRS = $(INCLUDE_DIR)
+SRC_DIR := src
+INCLUDE_DIR := include
+SRC_DIRS := $(call fixpath,$(SRC_DIR))
+INCLUDE_DIRS := $(call fixpath,$(INCLUDE_DIR))
 
 # --------------------------------------------------------------------
 # Target shared library
 # --------------------------------------------------------------------
-LIB_NAME = libengine$(SHARED_LIB_EXT)
-LIB_TARGET = $(LIB_DIR)/$(LIB_NAME)
+LIB_NAME := libengine$(LIB_EXT)
+LIB_TARGET := $(call fixpath,$(LIB_DIR)/$(LIB_NAME))
 
 # --------------------------------------------------------------------
 # Sources and objects
 # --------------------------------------------------------------------
-SOURCES = $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
-OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/engine/%.o,$(SOURCES))
+SOURCES := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
+OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/engine/%.o,$(SOURCES))
+DEPS := $(OBJECTS:.o=.d)
 
 # --------------------------------------------------------------------
 # Compiler flags
@@ -37,28 +39,29 @@ IFLAGS += $(addprefix -I,$(INCLUDE_DIRS))
 # Default target
 # --------------------------------------------------------------------
 all: $(LIB_TARGET)
-	$(ECHO) "Engine shared library built at $(LIB_TARGET)"
+	@echo Engine shared library built at $(LIB_TARGET)
 
 # --------------------------------------------------------------------
 # Build the shared library
 # --------------------------------------------------------------------
 $(LIB_TARGET): $(OBJECTS)
-	$(ECHO) "Creating engine shared library..."
+	@echo  - Creating engine shared library...
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(SHARED_LIB_FLAG) -o $@ $^ $(LFLAGS)
+	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
 
 # --------------------------------------------------------------------
-# Compile source files into object files
+# Compile source files into object files and generate dependencies
 # --------------------------------------------------------------------
-$(OBJ_DIR)/engine/%.o: $(SRC_DIR)/%.c
-	$(ECHO) "Compiling $<..."
+$(call fixpath,$(OBJ_DIR)/engine/%.o): $(call fixpath,$(SRC_DIR)/%.c)
+	@echo  - Compiling $<...
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) -fPIC -c $< -o $@
+	@$(CC) $(CFLAGS) $(IFLAGS) $(DEPFLAGS) -c $< -o $@
+
+-include $(DEPS)
 
 # --------------------------------------------------------------------
 # Clean target
 # --------------------------------------------------------------------
 clean:
-	$(ECHO) "Cleaning engine build artifacts..."
-	@$(RM) $(OBJ_DIR)/engine
-	@$(RM) $(LIB_TARGET)
+	@echo --- Cleaning engine... ---
+	@$(RM) -r $(call fixpath,$(OBJ_DIR)/engine) $(LIB_TARGET)

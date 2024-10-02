@@ -19,4 +19,5 @@
     "terminal.integrated.fontSize": 14,
     "terminal.integrated.cursorBlinking": true,
     "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+    "C_Cpp.default.compilerPath": "C:\\LLVM\\bin\\clang.exe",
 }

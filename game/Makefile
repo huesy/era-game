@@ -2,26 +2,28 @@
 
 # Include common configuration
 include ../config.mk
+include ../config.exe.mk
 
 # --------------------------------------------------------------------
 # Target executable
 # --------------------------------------------------------------------
-TARGET = game$(EXE_EXT)
-BIN_TARGET = $(BIN_DIR)/$(TARGET)
+TARGET := game$(EXE_EXT)
+BIN_TARGET := $(call fixpath,$(BIN_DIR)/$(TARGET))
 
 # --------------------------------------------------------------------
 # Directories
 # --------------------------------------------------------------------
-SRC_DIR = src
-INCLUDE_DIR = include
-SRC_DIRS = $(SRC_DIR)
-INCLUDE_DIRS = $(INCLUDE_DIR) ../engine/include
+SRC_DIR := src
+INCLUDE_DIR := include
+SRC_DIRS := $(call fixpath,$(SRC_DIR))
+INCLUDE_DIRS := $(call fixpath,$(INCLUDE_DIR)) ../engine/include
 
 # --------------------------------------------------------------------
 # Sources and objects
 # --------------------------------------------------------------------
-SOURCES = $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
-OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/game/%.o,$(SOURCES))
+SOURCES := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c)
+OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(call fixpath,$(OBJ_DIR)/game/%.o),$(SOURCES))
+DEPS := $(OBJECTS:.o=.d)
 
 # --------------------------------------------------------------------
 # Compiler flags
@@ -38,28 +40,29 @@ LFLAGS += -L$(LIB_DIR) -lengine
 # Default target
 # --------------------------------------------------------------------
 all: $(BIN_TARGET)
-	$(ECHO) "Game executable built at $(BIN_TARGET)"
+	@echo Game executable built at $(BIN_TARGET)
 
 # --------------------------------------------------------------------
 # Build executable
 # --------------------------------------------------------------------
-$(BIN_TARGET): $(OBJECTS) $(LIB_DIR)/libengine$(SHARED_LIB_EXT)
-	$(ECHO) "Linking game executable..."
+$(BIN_TARGET): $(OBJECTS) $(call fixpath,$(LIB_DIR)/libengine$(SHARED_LIB_EXT))
+	@echo --- Linking game executable... ---
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) $^ -o $@ $(LFLAGS)
+	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
 
 # --------------------------------------------------------------------
-# Compile source files into object files
+# Compile source files into object files and generate dependencies
 # --------------------------------------------------------------------
-$(OBJ_DIR)/game/%.o: $(SRC_DIR)/%.c
-	$(ECHO) "Compiling $<..."
+$(call fixpath,$(OBJ_DIR)/game/%.o): $(call fixpath,$(SRC_DIR)/%.c)
+	@echo --- Compiling $<... ---
 	@$(call MKDIR_P,$(@D))
-	@$(CC) $(CFLAGS) $(IFLAGS) -c $< -o $@
+	@$(CC) $(CFLAGS) $(IFLAGS) $(DEPFLAGS) -c $< -o $@
+
+-include $(DEPS)
 
 # --------------------------------------------------------------------
 # Clean target
 # --------------------------------------------------------------------
 clean:
-	$(ECHO) "Cleaning game build artifacts..."
-	@$(RM) $(OBJ_DIR)/game
-	@$(RM) $(BIN_TARGET)
+	@echo --- Cleaning game ---
+	@$(RM) -r $(call fixpath,$(OBJ_DIR)/game) $(BIN_TARGET)

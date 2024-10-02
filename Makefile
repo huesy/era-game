@@ -22,12 +22,12 @@ all: $(SUBDIRS)
 # Build subdirectories
 # --------------------------------------------------------------------
 $(SUBDIRS):
-	$(ECHO) "Building $@..."
-	@$(MAKE) -C $@ BUILD_DIR=$(BUILD_DIR) DEBUG=$(DEBUG)
+	@echo --- Building $@... ---
+	@$(MAKE) -C $@
 
 # --------------------------------------------------------------------
 # Clean target
 # --------------------------------------------------------------------
 clean:
-	$(ECHO) "Cleaning all build artifacts..."
+	@echo --- Cleaning all ---
 	@$(RM) $(BUILD_DIR)
