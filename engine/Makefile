@@ -1,7 +1,6 @@
 ASSEMBLY := engine
 LIB_TYPE ?= static
-
-CC = @clang
+CC = clang
 CFLAGS := -Wall -Wextra -Werror -Wpedantic
 LDFLAGS :=
 
@@ -16,16 +15,16 @@ DEPDIR = $(BUILDDIR)/dep
 SRC = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
 OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
 DEPS = $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SRC))
-
 LOGFILE = $(BUILDDIR)/build_log.txt
 
 # Detect platform
-ifeq ($(OS), Windows_NT)
+ifeq ($(OS),Windows_NT)
     PLATFORM := windows
-    MKDIR = @if not exist "$(subst /,\\,$(1))" mkdir "$(subst /,\\,$(1))"
+    SHELL := cmd.exe
+    MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     RM := rmdir /S /Q
+    ECHO := echo
     ifeq ($(LIB_TYPE),static)
-        # No static library, using object files for static linking
         EXTENSION := .o
         TARGET := $(OBJ)
     else
@@ -35,13 +34,13 @@ ifeq ($(OS), Windows_NT)
     endif
 else
     OS := $(shell uname -s)
-    ifeq ($(OS), Darwin)
+    ifeq ($(OS),Darwin)
         PLATFORM := macos
         MKDIR := mkdir -p
         RM := rm -rf
+        ECHO := echo
         CFLAGS += -fPIC
         ifeq ($(LIB_TYPE),static)
-            # No static library, using object files for static linking
             EXTENSION := .o
             TARGET := $(OBJ)
         else
@@ -49,13 +48,13 @@ else
             SHARED_FLAG := -dynamiclib
             TARGET := $(BUILDDIR)/lib$(ASSEMBLY)$(EXTENSION)
         endif
-    else ifeq ($(OS), Linux)
+    else ifeq ($(OS),Linux)
         PLATFORM := linux
         MKDIR := mkdir -p
         RM := rm -rf
+        ECHO := echo
         CFLAGS += -fPIC
         ifeq ($(LIB_TYPE),static)
-            # No static library, using object files for static linking
             EXTENSION := .o
             TARGET := $(OBJ)
         else
@@ -75,24 +74,24 @@ all: $(TARGET)
 
 # Create object files from source files and generate dependencies
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	@echo Compiling $<...
-	$(call MKDIR,$(dir $@))
-	$(CC) $(CFLAGS) -I$(INCDIR) -MMD -MP -c $< -o $@
+	@$(ECHO) "Compiling $<..."
+	@$(call MKDIR,$(dir $@))
+	@$(CC) $(CFLAGS) -I$(INCDIR) -MMD -MP -c $< -o $@
 
 # Build the dynamic library
 ifeq ($(LIB_TYPE),dynamic)
 $(TARGET): $(OBJ)
-	@echo Linking dynamic library $(TARGET)...
-	$(call MKDIR,$(BUILDDIR))
-	$(CC) $(OBJ) $(SHARED_FLAG) -o $(TARGET)
-	@echo Compiled $(TARGET) as a $(LIB_TYPE) library with flags: $(CFLAGS) $(SHARED_FLAG) > $(LOGFILE)
+	@$(ECHO) "Linking dynamic library $(TARGET)..."
+	@$(call MKDIR,$(BUILDDIR))
+	@$(CC) $(OBJ) $(SHARED_FLAG) -o $(TARGET)
+	@$(ECHO) "Compiled $(TARGET) as a $(LIB_TYPE) library with flags: $(CFLAGS) $(SHARED_FLAG)" > $(LOGFILE)
 endif
 
 # Clean method
 clean:
-	@echo Cleaning $(BUILDDIR)...
+	@$(ECHO) "Cleaning $(BUILDDIR)..."
 ifeq ($(PLATFORM),windows)
-	@if exist $(BUILDDIR) $(RM) $(BUILDDIR)
+	@if exist $(subst /,\,$(BUILDDIR)) $(RM) $(subst /,\,$(BUILDDIR))
 else
 	@$(RM) $(BUILDDIR)
 endif

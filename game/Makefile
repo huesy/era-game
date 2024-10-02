@@ -38,22 +38,26 @@ LOGFILE = $(BUILDDIR)/build_log.txt
 # Detect platform
 ifeq ($(OS), Windows_NT)
     PLATFORM := windows
-    MKDIR = @if not exist "$(subst /,\\,$(1))" mkdir "$(subst /,\\,$(1))"
+    SHELL := cmd.exe
+    MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     RM := rmdir /S /Q
     EXTENSION := .exe
     TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
+    ECHO := echo
 else
     OS := $(shell uname -s)
     ifeq ($(OS), Darwin)
         PLATFORM := macos
         MKDIR := mkdir -p
         RM := rm -rf
+        ECHO := echo
         EXTENSION :=
         TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
     else ifeq ($(OS), Linux)
         PLATFORM := linux
         MKDIR := mkdir -p
         RM := rm -rf
+        ECHO := echo
         EXTENSION :=
         TARGET := $(BUILDDIR)/$(ASSEMBLY)$(EXTENSION)
     else
@@ -68,29 +72,29 @@ all: $(TARGET)
 
 # Create object files from source files and generate dependencies
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	@echo Compiling $<...
-	$(call MKDIR,$(dir $@))
-	$(CC) $(CFLAGS) -I$(INCDIR) -I$(ENGINE_INCDIR) -MMD -MP -c $< -o $@
+	@$(ECHO) "Compiling $<..."
+	@$(call MKDIR,$(dir $@))
+	@$(CC) $(CFLAGS) -I$(INCDIR) -I$(ENGINE_INCDIR) -MMD -MP -c $< -o $@
 
 # Link the game executable with engine object files (static) or engine library (dynamic)
 ifeq ($(LIB_TYPE),static)
 $(TARGET): $(OBJ)
-	@echo Linking static game executable $(TARGET)...
-	$(call MKDIR,$(BUILDDIR))
-	$(CC) $(OBJ) $(ENGINE_OBJ) -o $(TARGET)
+	@$(ECHO) "Linking static game executable $(TARGET)..."
+	@$(call MKDIR,$(BUILDDIR))
+	@$(CC) $(OBJ) $(ENGINE_OBJ) -o $(TARGET)
 else
 $(TARGET): $(OBJ)
-	@echo Linking dynamic game executable $(TARGET)...
-	$(call MKDIR,$(BUILDDIR))
-	$(CC) $(OBJ) -L$(ENGINE_LIBDIR) -lengine $(LDFLAGS) -o $(TARGET)
+	@$(ECHO) "Linking dynamic game executable $(TARGET)..."
+	@$(call MKDIR,$(BUILDDIR))
+	@$(CC) $(OBJ) -L$(ENGINE_LIBDIR) -lengine $(LDFLAGS) -o $(TARGET)
 endif
-	@echo Compiled $(TARGET) with flags: $(CFLAGS) $(LDFLAGS) > $(LOGFILE)
+	@$(ECHO) "Compiled $(TARGET) with flags: $(CFLAGS) $(LDFLAGS)" > $(LOGFILE)
 
 # Clean method
 clean:
-	@echo Cleaning $(BUILDDIR)...
+	@$(ECHO) "Cleaning $(BUILDDIR)..."
 ifeq ($(PLATFORM),windows)
-	@if exist $(BUILDDIR) $(RM) $(BUILDDIR)
+	@if exist $(subst /,\,$(BUILDDIR)) $(RM) $(subst /,\,$(BUILDDIR))
 else
 	@$(RM) $(BUILDDIR)
 endif
