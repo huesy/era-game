@@ -11,6 +11,12 @@ BUILDDIR = build
 OBJDIR = $(BUILDDIR)/obj
 DEPDIR = $(BUILDDIR)/dep
 
+ifeq ($(DEBUG),1)
+    CFLAGS += -g O0
+else
+    CFLAGS += -O3
+endif
+
 # Find all C source files and generate corresponding object files and dependencies
 SRC = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
 OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))

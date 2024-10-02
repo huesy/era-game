@@ -13,19 +13,27 @@ BUILDDIR = build
 OBJDIR = $(BUILDDIR)/obj
 DEPDIR = $(BUILDDIR)/dep
 
+ifeq ($(DEBUG),1)
+    CFLAGS += -g O0
+else
+    CFLAGS += -O3
+endif
+
 # Paths to the engine object files and include directory
 ENGINE_OBJDIR = ../engine/build/obj
 ENGINE_INCDIR = ../engine/include
+# Ensure the correct engine object files are used for static builds
 ENGINE_OBJ = $(wildcard $(ENGINE_OBJDIR)/**/*.o) $(wildcard $(ENGINE_OBJDIR)/*.o)
 
 # Paths to the engine dynamic library
 ENGINE_LIBDIR = ../engine/build
 # For Linux (example)
-ENGINE_LIB := $(ENGINE_LIBDIR)/libengine.so
 ifeq ($(OS), Windows_NT)
     ENGINE_LIB := $(ENGINE_LIBDIR)/engine.dll
 else ifeq ($(OS), Darwin)
     ENGINE_LIB := $(ENGINE_LIBDIR)/libengine.dylib
+else ifeq ($(OS), Linux)
+    ENGINE_LIB := $(ENGINE_LIBDIR)/libengine.so
 endif
 
 # Find all C source files and generate corresponding object files and dependencies

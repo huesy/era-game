@@ -1,73 +1,116 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "Build Engine",
-            "type": "shell",
-            "command": "make",
-            "args": ["engine"],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "Builds the engine library using the Makefile."
-        },
-        {
-            "label": "Build Game",
-            "type": "shell",
-            "command": "make",
-            "args": ["game"],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "Builds the game executable using the Makefile."
-        },
-        {
-            "label": "Build Tests",
-            "type": "shell",
-            "command": "make",
-            "args": ["tests"],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "Builds the tests executable using the Makefile."
-        },
-        {
-            "label": "Build All",
-            "type": "shell",
-            "command": "make",
-            "args": ["all"],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "detail": "Builds all components using the Makefile."
-        },
-        {
-            "label": "Clean",
-            "type": "shell",
-            "command": "make",
-            "args": ["clean"],
-            "group": {
-                "kind": "build",
-                "isDefault": false
-            },
-            "problemMatcher": [],
-            "detail": "Cleans the build artifacts using the Makefile."
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build All (Debug)",
+      "type": "shell",
+      "command": "./build_all.sh",
+      "windows": {
+        "command": "build_all.bat",
+        "args": [
+          "windows",
+          "build",
+          "debug"
+        ]
+      },
+      "osx": {
+        "args": [
+          "osx",
+          "build",
+          "debug"
+        ]
+      },
+      "linux": {
+        "args": [
+          "linux",
+          "build",
+          "debug"
+        ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"],
+      "detail": "Builds both engine and game using the custom build script"
+    },
+    {
+      "label": "Clean All",
+      "type": "shell",
+      "command": "./clean_all.sh",
+      "windows": {
+        "command": "clean_all.bat"
+      },
+      "args": ["clean"],
+      "group": {
+        "kind": "clean",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Cleans both engine and game"
+    },
+    {
+      "label": "Build All (Release)",
+      "type": "shell",
+      "command": "./build_all.sh",
+      "windows": {
+        "command": "build_all.bat",
+        "args": [
+          "windows",
+          "build",
+          "release"
+        ]
+      },
+      "osx": {
+        "args": [
+          "osx",
+          "build",
+          "release"
+        ]
+      },
+      "linux": {
+        "args": [
+          "linux",
+          "build",
+          "release"
+        ]
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"],
+      "detail": "Builds both engine and game using the custom build script"
+    },
+    {
+      "label": "Build Engine",
+      "type": "shell",
+      "command": "make",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/engine"
+      },
+      "problemMatcher": ["$gcc"],
+      "detail": "Builds the engine"
+    },
+    {
+      "label": "Build Game",
+      "type": "shell",
+      "command": "make",
+      "args": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}/game"
+      },
+      "problemMatcher": ["$gcc"],
+      "detail": "Builds the game"
+    }
+  ]
 }
