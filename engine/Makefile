@@ -75,7 +75,11 @@ all: $(TARGET)
 # Create object files from source files and generate dependencies
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@$(ECHO) "Compiling $<..."
+ifeq ($(PLATFORM),windows)
 	@$(call MKDIR,$(dir $@))
+else
+	@$(MKDIR) $(dir $@)
+endif
 	@$(CC) $(CFLAGS) -I$(INCDIR) -MMD -MP -c $< -o $@
 
 # Build the dynamic library

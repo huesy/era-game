@@ -73,19 +73,24 @@ all: $(TARGET)
 # Create object files from source files and generate dependencies
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	@$(ECHO) "Compiling $<..."
+ifeq ($(PLATFORM),windows)
 	@$(call MKDIR,$(dir $@))
+else
+	@$(MKDIR) $(dir $@)
+endif
 	@$(CC) $(CFLAGS) -I$(INCDIR) -I$(ENGINE_INCDIR) -MMD -MP -c $< -o $@
 
 # Link the game executable with engine object files (static) or engine library (dynamic)
-ifeq ($(LIB_TYPE),static)
 $(TARGET): $(OBJ)
-	@$(ECHO) "Linking static game executable $(TARGET)..."
+	@$(ECHO) "Linking $(LIB_TYPE) game executable $(TARGET)..."
+ifeq ($(PLATFORM),windows)
 	@$(call MKDIR,$(BUILDDIR))
+else
+	@$(MKDIR) $(BUILDDIR)
+endif
+ifeq ($(LIB_TYPE),static)
 	@$(CC) $(OBJ) $(ENGINE_OBJ) -o $(TARGET)
 else
-$(TARGET): $(OBJ)
-	@$(ECHO) "Linking dynamic game executable $(TARGET)..."
-	@$(call MKDIR,$(BUILDDIR))
 	@$(CC) $(OBJ) -L$(ENGINE_LIBDIR) -lengine $(LDFLAGS) -o $(TARGET)
 endif
 	@$(ECHO) "Compiled $(TARGET) with flags: $(CFLAGS) $(LDFLAGS)" > $(LOGFILE)
