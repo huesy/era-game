@@ -6,22 +6,22 @@
       "type": "cppdbg",
       "request": "launch",
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/game/build/",
+      "cwd": "${workspaceFolder}/build/bin/",
       "environment": [],
-      "program": "${workspaceFolder}/game/build/game",
+      "program": "${workspaceFolder}/build/bin/game",
       "osx": {
         "MIMode": "lldb",
         "targetArchitecture": "arm64",
-        "externalConsole": false
+        "externalConsole": false,
       },
       "linux": {
-        "externalConsole": false
+        "externalConsole": false,
       },
       "windows": {
         "type": "cppvsdbg",
-        "program": "${workspaceFolder}/game/build/game.exe",
-        "externalConsole": false
-      }
-    }
-  ]
+        "program": "${workspaceFolder}/build/bin/game.exe",
+        "externalConsole": false,
+      },
+    },
+  ],
 }

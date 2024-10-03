@@ -1,22 +1,5 @@
-@echo off
-:: Clean engine first
-echo --- Cleaning Engine ---
-cd engine
-make clean
-if %errorlevel% neq 0 (
-    echo Failed to clean engine.
-    exit /b %errorlevel%
-)
-cd ..
+@ECHO OFF
 
-:: Clean game next
-echo --- Cleaning Game ---
-cd game
-make clean
-if %errorlevel% neq 0 (
-    echo Failed to clean game.
-    exit /b %errorlevel%
-)
-cd ..
-
-echo --- Cleaned all successfully ---
+REM Convenience build script for Windows
+echo "--- Cleaning All ---"
+build_all.bat windows clean all

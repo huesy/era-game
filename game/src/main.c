@@ -1,13 +1,40 @@
 // #include "engine.h"
 // #include "game.h"
-#include "engine.h"
 #include <stdio.h>
+#include <windows.h>
+
+typedef void (*EngineInitFunc)(void);
 
 // void gameInit() { printf("Game function called\n"); }
 
 int main(void) {
+
+    HMODULE hEngine;
+    EngineInitFunc pEngineInit;
+
     printf("Game started\n");
-    EngineInit();
+
+    // Load the engine DLL
+    hEngine = LoadLibrary("engine.dll");
+    if (hEngine == NULL) {
+        printf("Failed to load engine.dll\n");
+        return 1;
+    }
+
+    // Get the address of the EngineInit function.
+    pEngineInit = (EngineInitFunc)GetProcAddress(hEngine, "EngineInit");
+    if (pEngineInit == NULL) {
+        printf("Failed to get address of EngineInit\n");
+        FreeLibrary(hEngine);
+        return 1;
+    }
+
+    // Call the EngineInit function.
+    pEngineInit();
     // gameInit();
+
+    // Unload the engine DLL
+    FreeLibrary(hEngine);
+
     return 0;
 }

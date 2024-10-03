@@ -2,115 +2,107 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "type": "shell",
       "label": "Build All (Debug)",
-      "type": "shell",
+      "detail": "Builds everything for debug.",
       "command": "./build_all.sh",
       "windows": {
-        "command": "build_all.bat",
+        "command": ".\\build_all.bat",
         "args": [
           "windows",
           "build",
-          "debug"
-        ]
-      },
-      "osx": {
-        "args": [
-          "osx",
-          "build",
-          "debug"
-        ]
+          "debug",
+        ],
       },
       "linux": {
         "args": [
           "linux",
           "build",
-          "debug"
-        ]
+          "debug",
+        ],
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
+      "osx": {
+        "args": [
+          "osx",
+          "build",
+          "debug",
+        ],
+      },
+      "options": {
+        "cwd": "${workspaceFolder}",
       },
       "problemMatcher": ["$gcc"],
-      "detail": "Builds both engine and game using the custom build script"
-    },
-    {
-      "label": "Clean All",
-      "type": "shell",
-      "command": "./clean_all.sh",
-      "windows": {
-        "command": "clean_all.bat"
-      },
-      "args": ["clean"],
       "group": {
-        "kind": "clean",
-        "isDefault": true
+        "kind": "build",
+        "isDefault": true,
       },
-      "problemMatcher": [],
-      "detail": "Cleans both engine and game"
     },
     {
+      "type": "shell",
       "label": "Build All (Release)",
-      "type": "shell",
+      "detail": "Builds everything for release.",
       "command": "./build_all.sh",
       "windows": {
-        "command": "build_all.bat",
+        "command": ".\\build_all.bat",
         "args": [
           "windows",
           "build",
-          "release"
-        ]
-      },
-      "osx": {
-        "args": [
-          "osx",
-          "build",
-          "release"
-        ]
+          "release",
+        ],
       },
       "linux": {
         "args": [
           "linux",
           "build",
-          "release"
-        ]
+          "release",
+        ],
       },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "problemMatcher": ["$gcc"],
-      "detail": "Builds both engine and game using the custom build script"
-    },
-    {
-      "label": "Build Engine",
-      "type": "shell",
-      "command": "make",
-      "args": [],
-      "group": {
-        "kind": "build",
-        "isDefault": false
+      "osx": {
+        "args": [
+          "osx",
+          "build",
+          "release",
+        ],
       },
       "options": {
-        "cwd": "${workspaceFolder}/engine"
+        "cwd": "${workspaceFolder}",
       },
       "problemMatcher": ["$gcc"],
-      "detail": "Builds the engine"
-    },
-    {
-      "label": "Build Game",
-      "type": "shell",
-      "command": "make",
-      "args": [],
       "group": {
         "kind": "build",
-        "isDefault": false
+      },
+    },
+    {
+      "type": "shell",
+      "label": "Clean All",
+      "detail": "Cleans everything",
+      "command": "./build_all.sh",
+      "windows": {
+        "command": ".\\build_all.bat",
+        "args": [
+          "windows",
+          "clean",
+          "all",
+        ],
+      },
+      "linux": {
+        "args": [
+          "linux",
+          "clean",
+          "all",
+        ],
+      },
+      "osx": {
+        "args": [
+          "osx",
+          "clean",
+          "all",
+        ],
       },
       "options": {
-        "cwd": "${workspaceFolder}/game"
+        "cwd": "${workspaceFolder}",
       },
-      "problemMatcher": ["$gcc"],
-      "detail": "Builds the game"
-    }
-  ]
+      "group": "build",
+    },
+  ],
 }
