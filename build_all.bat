@@ -43,7 +43,7 @@ ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 @REM --------------------------------------------------------------------------
 
 REM Engine core library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine LDFLAGS="-shared %ENGINE_LINK%"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine LDFLAGS="%ENGINE_LINK%"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 @REM --------------------------------------------------------------------------

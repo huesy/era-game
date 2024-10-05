@@ -1,12 +1,12 @@
 # Notes:
-# `ASSEMBLY` must be set when calling this Makefile
-# `TARGET`   must be set when calling this Makefile
-# `STATIC`   may be set to `1` when calling this Makefile to build a static library.
-# `DYNAMIC`  may be set to `1` when calling this Makefile to build a dynamic library.
-# `CFLAGS`   may be set when calling this Makefile to append additional compiler flags.
-# `LDFLAGS`  may be set when calling this Makefile to append additional linker flags.
-# `INCLUDES` may be set when calling this Makefile to append additional include directories.
-# `DEFINES`  may be set when calling this Makefile to append additional preprocessor definitions.
+# 'ASSEMBLY' must be set when calling this Makefile
+# 'TARGET'   must be set when calling this Makefile
+# 'STATIC'   may be set to '1' when calling this Makefile to build a static library.
+# 'DYNAMIC'  may be set to '1' when calling this Makefile to build a dynamic library.
+# 'CFLAGS'   may be set when calling this Makefile to append additional compiler flags.
+# 'LDFLAGS'  may be set when calling this Makefile to append additional linker flags.
+# 'INCLUDES' may be set when calling this Makefile to append additional include directories.
+# 'DEFINES'  may be set when calling this Makefile to append additional preprocessor definitions.
 
 CC = clang
 
@@ -52,7 +52,7 @@ else
 endif
 
 # Defines
-_DEFINES += -DERA_EXPORT
+_DEFINES += -DENGINE_EXPORT
 
 # Directories
 SRCDIR = $(ASSEMBLY)/src
@@ -131,35 +131,35 @@ scaffold:
 
 .PHONY: link
 link: scaffold $(OBJFILES)
-	@$(ECHO) Linking `$(OUTPUT)`...
+	@$(ECHO) Linking '$(OUTPUT)'...
 	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(OUTPUT)
-	@$(ECHO) Compiled `$(OUTPUT)` as a `$(PLATFORM)` library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
+	@$(ECHO) Compiled '$(OUTPUT)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
 
 .PHONY: compile
 compile:
-	@$(ECHO) --- Performing `$(ASSEMBLY)` `$(OUTPUT)` build ---
+	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(OUTPUT)' build ---
 -include $(OBJFILES:.o=.d)
 
 .PHONY: clean
 clean:
-	@$(ECHO) --- Cleaning `$(ASSEMBLY)` ---
+	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
 	@$(call DEL,$(OUTPUT))
 	@$(call DEL,$(BINDIR)/$(ASSEMBLY).*)
 	@$(call RM,$(OBJDIR))
 
 # Create object files from source files and generate dependencies
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
-	@$(ECHO) Compiling `$<`...
+	@$(ECHO) Compiling '$<'...
 	@$(call MKDIR,$(dir $@))
 	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
 
 # Compile .m to .o objects only for macos
-ifeq ($(PLATFORM),macos)
-$(OBJDIR)/%.o: $(SRCDIR)/%.m
-	@$(ECHO) Compiling `$<`...
-	@$(call MKDIR,$(dir $@))
-	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
-endif
+# ifeq ($(PLATFORM),macos)
+# $(OBJDIR)/%.o: $(SRCDIR)/%.m
+# 	@$(ECHO) Compiling '$<'...
+# 	@$(call MKDIR,$(dir $@))
+# 	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
+# endif
 
 # Generate dependencies
 -include $(OBJFILES:.o=.d)
