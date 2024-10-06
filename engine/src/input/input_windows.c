@@ -25,14 +25,15 @@ static u8 windows_key_pressed(InputKey key) {
     return keyStates[key];
 }
 
-static InputAPI windows_input_api = {0};
-windows_input_api.initialize = windows_input_initialize;
-windows_input_api.shutdown = windows_input_shutdown;
-windows_input_api.update = windows_input_update;
-windows_input_api.keyPressed = windows_key_pressed;
+static InputAPI windowsInputApi = {0};
 
 void input_windows_set_api() {
-    input_set_api(&windows_input_api);
+    windowsInputApi.initialize = windows_input_initialize;
+    windowsInputApi.shutdown = windows_input_shutdown;
+    windowsInputApi.update = windows_input_update;
+    windowsInputApi.keyPressed = windows_key_pressed;
+
+    input_set_api(&windowsInputApi);
 }
 
 #endif // PLATFORM_WINDOWS

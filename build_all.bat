@@ -50,6 +50,14 @@ IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 @REM Executables
 @REM --------------------------------------------------------------------------
 
+REM Testbed
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=testbed
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
+
+REM Editor
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
+
 REM Game
 make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)

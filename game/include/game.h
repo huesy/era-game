@@ -1,6 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
 
-void gameInit();
+void game_initialize();
 
 #endif

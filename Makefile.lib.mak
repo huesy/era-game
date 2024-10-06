@@ -107,7 +107,7 @@ else
         PREFIX := lib
 
         _CFLAGS += -fPIC
-        _LDFLAGS += -L./$(OBJDIR) -L./$(BUILDDIR) -shared -dynamiclib
+        _LDFLAGS += -L./$(OBJDIR) -L./$(BUILDDIR) -shared -dynamiclib -framework Carbon
         _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"

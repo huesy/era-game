@@ -19,6 +19,13 @@ void memory_copy(void *dest, const void *src, u64 size) {
     }
 }
 
+void memory_zero(void *dest, u64 size) {
+    u8 *d = (u8 *)dest;
+    for (u64 i = 0; i < size; ++i) {
+        d[i] = 0;
+    }
+}
+
 MemoryPool *memory_pool_create(u64 blockSize, u64 blockCount) {
     // Allocate memory for the pool.
     MemoryPool *pool = memory_allocate(sizeof(MemoryPool));

@@ -45,6 +45,20 @@ fi
 # Executables
 # --------------------------------------------------------------------------
 
+# Testbed
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=testbed
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+# Editor
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
 # Game
 make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game
 if [ $? -ne 0 ]; then
