@@ -39,7 +39,7 @@ else
 endif
 
 # Compiler Flags
-_CFLAGS += -Wall -Wextra -Werror -Wpedantic -fdeclspec
+_CFLAGS += -Wall -Wextra -Werror -fdeclspec
 ifeq ($(TARGET),release)
     # release
     _CFLAGS += -MD -O2

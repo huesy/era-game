@@ -23,7 +23,7 @@
       },
       "osx": {
         "args": [
-          "osx",
+          "macos",
           "build",
           "debug",
         ],
@@ -59,7 +59,7 @@
       },
       "osx": {
         "args": [
-          "osx",
+          "macos",
           "build",
           "release",
         ],
@@ -94,7 +94,7 @@
       },
       "osx": {
         "args": [
-          "osx",
+          "macos",
           "clean",
           "all",
         ],

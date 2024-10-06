@@ -1,13 +1,22 @@
 {
   "editor.insertSpaces": true,
+  "editor.tabSize": 4,
   "editor.rulers": [
     80,
   ],
   "files.eol": "\n",
+  "files.insertFinalNewline": true,
   "editor.folding": true,
   "files.associations": {
+    "*.embeddedhtml": "html",
     "stdlib.h": "c",
-    "stdio.h": "c"
+    "stdio.h": "c",
+    "stdint.h": "c",
+    "defines.h": "c",
+    "_ptrcheck.h": "c",
+    "_stdlib.h": "c",
+    "scene_manager.h": "c",
+    "stddef.h": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",

@@ -3,5 +3,6 @@ IndentWidth: 4
 ColumnLimit: 0
 NamespaceIndentation: All
 BreakBeforeBraces: Attach
-PointerAlignment: Left
+PointerAlignment: Right
 IndentPPDirectives: AfterHash
+InsertNewlineAtEOF: true
