@@ -3,6 +3,11 @@
 
 #include "render/renderer.h"
 
+#ifdef PLATFORM_WINDOWS
+#    include <windows.h>
+#endif
+#include <GL/gl.h>
+
 /**
  * @brief Initialises the OpenGL renderer API.
  */
