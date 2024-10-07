@@ -100,6 +100,31 @@ typedef _Bool b8;
 /** @brief False value. */
 #define false 0
 
+// Min and max limits
+#define MIN_U8 0U
+#define MIN_U16 0U
+#define MIN_U32 0U
+#define MIN_U64 0UL
+#define MAX_U8 255U
+#define MAX_U16 65535U
+#define MAX_U32 4294967295U
+#define MAX_U64 18446744073709551615UL
+
+#define MIN_I8 -128
+#define MIN_I16 -32768
+#define MIN_I32 -2147483648
+#define MIN_I64 -9223372036854775808L
+#define MAX_I8 127
+#define MAX_I16 32767
+#define MAX_I32 2147483647
+#define MAX_I64 9223372036854775807L
+
+// Invalid values
+#define INVALID_ID_U8 MAX_U8
+#define INVALID_ID_U16 MAX_U16
+#define INVALID_ID_U32 MAX_U32
+#define INVALID_ID_U64 MAX_U64
+
 // Memory macros
 #define ENGINE_ALLOC(size) malloc(size)
 #define ENGINE_FREE(ptr) free(ptr)

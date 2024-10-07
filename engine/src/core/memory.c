@@ -4,11 +4,11 @@
 #include <stdlib.h>
 
 void *memory_allocate(u64 size) {
-    return malloc(size);
+    return ENGINE_ALLOC(size);
 }
 
 void memory_free(void *ptr) {
-    free(ptr);
+    ENGINE_FREE(ptr);
 }
 
 void memory_copy(void *dest, const void *src, u64 size) {

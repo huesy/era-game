@@ -3,6 +3,9 @@
 
 #include "defines.h"
 
+#define INVALID_ENTITY MAX_U32
+#define INVALID_COMPONENT_TYPE MAX_U32
+
 // Maximum limits
 #define MAX_ENTITIES 4096
 #define MAX_COMPONENTS 256
@@ -11,24 +14,37 @@
 typedef u32 Entity;
 typedef u32 ComponentType;
 
-// Entity Manager
-typedef struct {
+/** @brief Entity manager structure. */
+typedef struct EntityManager {
+    /** @brief The next entity ID to assign. */
     Entity nextEntity;
+    /** @brief List of entity IDs that were previously destroyed and can be reused. */
     Entity freeEntities[MAX_ENTITIES];
+    /** @brief The number of previously destroyed entities that can be reused. */
     u32 freeCount;
 } EntityManager;
 
-// Sparse Set for components.
-typedef struct {
+/** @brief Component array structure. */
+typedef struct ComponentArray {
+    /** @brief Dense array of entities with this component. */
     Entity entities[MAX_ENTITIES];
+    /** @brief Dense array of component data. */
     void *components[MAX_ENTITIES];
+    /** @brief The number of entities that have this component. */
     u32 count;
+    /** @brief The size of the component in bytes. */
+    u32 size;
+    /** @brief Sparse array that maps Entity IDs to dense array indices. */
+    u32 sparse[MAX_ENTITIES];
 } ComponentArray;
 
-// ECS Manager
-typedef struct {
+/** @brief ECS manager structure. */
+typedef struct ECSManager {
+    /** @brief The entity manager. */
     EntityManager entityManager;
+    /** @brief Array of components. */
     ComponentArray componentArrays[MAX_COMPONENTS];
+    /** @brief The number of registered component types. */
     u32 registeredComponents;
 } ECSManager;
 

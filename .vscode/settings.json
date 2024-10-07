@@ -16,7 +16,8 @@
     "_ptrcheck.h": "c",
     "_stdlib.h": "c",
     "scene_manager.h": "c",
-    "stddef.h": "c"
+    "stddef.h": "c",
+    "utility": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",
