@@ -39,7 +39,7 @@ else
 endif
 
 # Compiler Flags
-_CFLAGS += -Wall -Wextra -Werror -Wpedantic -fdeclspec
+_CFLAGS += -Wall -Wextra -Werror -fdeclspec
 ifeq ($(TARGET),release)
     # release
     _CFLAGS += -MD -O2
@@ -75,7 +75,7 @@ ifeq ($(OS),Windows_NT)
     _CFLAGS += -Wstrict-prototypes
     _LDFLAGS += -L$(OBJDIR) -L$(BINDIR)
     _INCLUDES += -I$(ASSEMBLY)\include
-
+$(info INCLUDES: $(_INCLUDES))
     MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     RM = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
     DEL = if exist "$(subst /,\,$(1))" del "$(subst /,\,$(1))"

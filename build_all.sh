@@ -35,7 +35,7 @@ echo "$ACTION_STR everything on $PLATFORM ($TARGET)..."
 # --------------------------------------------------------------------------
 
 # Engine core library
-make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=engine LDFLAGS="$ENGINE_LINK"
+make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=engine LDFLAGS="$ENGINE_LINK -lOpenGL32"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
@@ -46,21 +46,21 @@ fi
 # --------------------------------------------------------------------------
 
 # Testbed
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=testbed
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=testbed LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
 # Editor
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
 # Game
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?

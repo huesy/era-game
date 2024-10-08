@@ -43,7 +43,7 @@ ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 @REM --------------------------------------------------------------------------
 
 REM Engine core library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine LDFLAGS="%ENGINE_LINK% -lGL"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine LDFLAGS="%ENGINE_LINK% -lOpenGL32"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 @REM --------------------------------------------------------------------------
@@ -51,15 +51,15 @@ IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 @REM --------------------------------------------------------------------------
 
 REM Testbed
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=testbed
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=testbed LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Editor
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game LDFLAGS="-lengine" INCLUDES="-Iengine\include"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 

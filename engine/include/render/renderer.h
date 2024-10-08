@@ -4,9 +4,9 @@
 #include "defines.h"
 
 typedef struct RendererAPI {
-    void (*initialize)();
-    void (*shutdown)();
-    void (*draw)();
+    void (*initialize)(void);
+    void (*shutdown)(void);
+    void (*draw)(void);
 } RendererAPI;
 
 /**
