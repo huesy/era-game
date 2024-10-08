@@ -1,6 +1,10 @@
 #include "render/opengl_renderer.h"
 #include "core/logging.h"
-#include <GL/gl.h>
+#ifdef PLATFORM_WINDOWS
+#    include <GL/gl.h>
+#elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
+#    include <OpenGL/gl.h>
+#endif
 
 void opengl_renderer_init(void) {
     log_info("Initialising OpenGL renderer");

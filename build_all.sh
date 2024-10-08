@@ -20,9 +20,14 @@ else
 fi
 
 if [ "$PLATFORM" == "windows" ]; then
-    ENGINE_LINK="-luser32"
-elif [ "$PLATFORM" == "linux" ] || [ "$PLATFORM" == "macos" ]; then
-    ENGINE_LINK=""
+    PLATFORM_DIR="windows"
+    LDFLAGS="-luser32 -lOpenGL32"
+elif [ "$PLATFORM" == "linux" ]; then
+    PLATFORM_DIR="linux"
+    LDFLAGS=""
+elif [ "$PLATFORM" == "macos" ]; then
+    PLATFORM_DIR="macos"
+    LDFLAGS="-framework OpenGL -framework Cocoa"
 else
     echo "Invalid platform: $PLATFORM"
     exit 1
@@ -35,7 +40,21 @@ echo "$ACTION_STR everything on $PLATFORM ($TARGET)..."
 # --------------------------------------------------------------------------
 
 # Engine core library
-make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=engine LDFLAGS="$ENGINE_LINK -lOpenGL32"
+make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=$PLATFORM_DIR LDFLAGS="$LDFLAGS"
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+# Game logic library
+make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=game-lib OUTPUT=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine" INCLUDES="-Iengine-lib/include"
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+# Editor logic library
+make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine" INCLUDES="-Iengine-lib/include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
@@ -45,22 +64,15 @@ fi
 # Executables
 # --------------------------------------------------------------------------
 
-# Testbed
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=testbed LDFLAGS="-lengine" INCLUDES="-Iengine\include"
-if [ $? -ne 0 ]; then
-    echo "Error: $?"
-    exit $?
-fi
-
 # Editor
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor LDFLAGS="-lengine" INCLUDES="-Iengine\include"
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine -leditor" INCLUDES="-Iengine-lib/include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
 # Game
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game LDFLAGS="-lengine" INCLUDES="-Iengine\include"
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine -lgame" INCLUDES="-Iengine-lib/include"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?

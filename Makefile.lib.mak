@@ -38,6 +38,11 @@ else
     _DEFINES := $(DEFINES)
 endif
 
+# OUTPUT
+ifeq ($(OUTPUT),)
+    OUTPUT := $(ASSEMBLY)
+endif
+
 # Compiler Flags
 _CFLAGS += -Wall -Wextra -Werror -fdeclspec
 ifeq ($(TARGET),release)
@@ -56,8 +61,8 @@ _DEFINES += -DENGINE_EXPORT
 
 # Directories
 SRCDIR = $(ASSEMBLY)/src
-BUILDDIR = build
-BINDIR = $(BUILDDIR)/bin
+BUILDDIR = build/$(PLATFORM)
+LIBDIR = $(BUILDDIR)/lib
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
 DEPDIR = $(BUILDDIR)/dep
 
@@ -76,7 +81,7 @@ ifeq ($(OS),Windows_NT)
     SHELL := cmd.exe
 
     _CFLAGS +=
-    _LDFLAGS += -L$(OBJDIR) -L.\$(BUILDDIR) -shared
+    _LDFLAGS += -L$(OBJDIR) -shared
     _INCLUDES += -I$(ASSEMBLY)\include
 
     MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
@@ -92,7 +97,7 @@ else
         PREFIX := lib
 
         _CFLAGS += -fPIC
-        _LDFLAGS += -L./$(OBJDIR) -L./$(BUILDDIR) -shared -lX11 -lX11-xcb -lxkbcommon
+        _LDFLAGS += -L./$(OBJDIR) -shared
         _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"
@@ -107,7 +112,7 @@ else
         PREFIX := lib
 
         _CFLAGS += -fPIC
-        _LDFLAGS += -L./$(OBJDIR) -L./$(BUILDDIR) -shared -dynamiclib -framework Carbon
+        _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib
         _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"
@@ -118,7 +123,7 @@ else
 endif
 
 # Define OUTPUT
-OUTPUT := $(BINDIR)/$(PREFIX)$(ASSEMBLY)$(EXTENSION)
+_OUTPUT := $(LIBDIR)/$(PREFIX)$(OUTPUT)$(EXTENSION)
 
 all: scaffold compile link
 
@@ -126,25 +131,25 @@ all: scaffold compile link
 
 .PHONY: scaffold
 scaffold:
-	@$(call MKDIR,$(BINDIR))
+	@$(call MKDIR,$(LIBDIR))
 	@$(call MKDIR,$(OBJDIR))
 
 .PHONY: link
 link: scaffold $(OBJFILES)
-	@$(ECHO) Linking '$(OUTPUT)'...
-	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(OUTPUT)
-	@$(ECHO) Compiled '$(OUTPUT)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
+	@$(ECHO) Linking '$(_OUTPUT)'...
+	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(_OUTPUT)
+	@$(ECHO) Compiled '$(_OUTPUT)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
 
 .PHONY: compile
 compile:
-	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(OUTPUT)' build ---
+	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(_OUTPUT)' build ---
 -include $(OBJFILES:.o=.d)
 
 .PHONY: clean
 clean:
 	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
-	@$(call DEL,$(OUTPUT))
-	@$(call DEL,$(BINDIR)/$(ASSEMBLY).*)
+	@$(call DEL,$(_OUTPUT))
+	@$(call DEL,$(LIBDIR)/$(ASSEMBLY).*)
 	@$(call RM,$(OBJDIR))
 
 # Create object files from source files and generate dependencies

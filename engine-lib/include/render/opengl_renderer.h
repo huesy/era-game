@@ -3,10 +3,7 @@
 
 #include "render/renderer.h"
 
-#ifdef PLATFORM_WINDOWS
-#    include <windows.h>
-#endif
-#include <GL/gl.h>
+#define GL_SILENCE_DEPRECATION
 
 /**
  * @brief Initialises the OpenGL renderer API.

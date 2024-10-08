@@ -53,7 +53,7 @@ endif
 
 # Directories
 SRCDIR = $(ASSEMBLY)/src
-BUILDDIR = build
+BUILDDIR = build/$(PLATFORM)
 BINDIR = $(BUILDDIR)/bin
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
 DEPDIR = $(BUILDDIR)/dep
