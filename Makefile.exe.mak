@@ -51,8 +51,11 @@ else
     _DEFINES += -D_DEBUG
 endif
 
+# Include directories
+_INCLUDES += -Iinclude
+
 # Directories
-SRCDIR = $(ASSEMBLY)/src
+SRCDIR = src/$(ASSEMBLY)
 BUILDDIR = build/$(PLATFORM)
 BINDIR = $(BUILDDIR)/bin
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
@@ -61,7 +64,6 @@ DEPDIR = $(BUILDDIR)/dep
 # Find all C source files and generate corresponding object files and dependencies
 SRCFILES = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
 OBJFILES = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCFILES))
-DEPFILES = $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SRCFILES))
 LOGFILE = $(BUILDDIR)/build_log.txt
 
 # Detect platform
@@ -74,8 +76,7 @@ ifeq ($(OS),Windows_NT)
 
     _CFLAGS += -Wstrict-prototypes
     _LDFLAGS += -L$(OBJDIR) -L$(BINDIR)
-    _INCLUDES += -I$(ASSEMBLY)\include
-$(info INCLUDES: $(_INCLUDES))
+
     MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     RM = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
     DEL = if exist "$(subst /,\,$(1))" del "$(subst /,\,$(1))"
@@ -90,7 +91,6 @@ else
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L$(OBJDIR) -L$(BINDIR)
-        _INCLUDES += -I$(ASSEMBLY)/Include
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"
@@ -105,7 +105,6 @@ else
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L$(OBJDIR) -L$(BUILDDIR)
-        _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"

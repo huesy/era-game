@@ -50,7 +50,7 @@ make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/lib -lengine"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Editor library
@@ -62,11 +62,11 @@ IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 @REM --------------------------------------------------------------------------
 
 REM Editor
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -leditor -lgame" INCLUDES="-Iengine-lib\include"
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -leditor -lgame"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -lgame" INCLUDES="-Iengine-lib\include"
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -lgame"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 ECHO All assemblies %ACTION_STR_PAST% successfully.

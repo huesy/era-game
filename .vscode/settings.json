@@ -19,7 +19,12 @@
     "stddef.h": "c",
     "utility": "c",
     "engine.h": "c",
-    "logging.h": "c"
+    "logging.h": "c",
+    "plugin.h": "c",
+    "windows.h": "c",
+    "iterator": "c",
+    "initializer_list": "c",
+    "xutility": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",

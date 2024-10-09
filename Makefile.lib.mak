@@ -56,33 +56,36 @@ else
     _DEFINES += -D_DEBUG
 endif
 
+# Include directories
+_INCLUDES += -Iinclude
+
 # Defines
 _DEFINES += -DENGINE_EXPORT
 
 # Directories
-SRCDIR = $(ASSEMBLY)/src
+SRCDIR = src/$(ASSEMBLY)
 BUILDDIR = build/$(PLATFORM)
 LIBDIR = $(BUILDDIR)/lib
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
-DEPDIR = $(BUILDDIR)/dep
 
 # Find all C source files and generate corresponding object files and dependencies
 SRCFILES = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
 OBJFILES = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCFILES))
-DEPFILES = $(patsubst $(SRCDIR)/%.c,$(DEPDIR)/%.d,$(SRCFILES))
 LOGFILE = $(BUILDDIR)/build_log.txt
 
 # Detect platform
 ifeq ($(OS),Windows_NT)
     # Windows
     PLATFORM := windows
-    EXTENSION := .dll
+    EXTENSION := dll
     PREFIX := 
     SHELL := cmd.exe
+        
+    _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+    _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).lib
 
     _CFLAGS +=
     _LDFLAGS += -L$(OBJDIR) -shared
-    _INCLUDES += -I$(ASSEMBLY)\include
 
     MKDIR = if not exist "$(subst /,\,$(1))" mkdir "$(subst /,\,$(1))"
     RM = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
@@ -93,12 +96,14 @@ else
     ifeq ($(OS),Linux)
         # Linux
         PLATFORM := linux
-        EXTENSION := .so
+        EXTENSION := so
         PREFIX := lib
+
+        _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+        _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).a
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared
-        _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"
@@ -108,12 +113,14 @@ else
     ifeq ($(OS),Darwin)
         # MacOS
         PLATFORM := macos
-        EXTENSION := .dylib
+        EXTENSION := dylib
         PREFIX := lib
+
+        _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+        _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).a
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib
-        _INCLUDES += -I$(ASSEMBLY)/include
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"
@@ -121,9 +128,6 @@ else
         ECHO = echo
     endif
 endif
-
-# Define OUTPUT
-_OUTPUT := $(LIBDIR)/$(PREFIX)$(OUTPUT)$(EXTENSION)
 
 all: scaffold compile link
 
@@ -136,20 +140,19 @@ scaffold:
 
 .PHONY: link
 link: scaffold $(OBJFILES)
-	@$(ECHO) Linking '$(_OUTPUT)'...
-	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(_OUTPUT)
-	@$(ECHO) Compiled '$(_OUTPUT)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
+	@$(ECHO) Linking '$(_DYNAMIC_LIB)'...
+	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(_DYNAMIC_LIB)
+	@$(ECHO) Compiled '$(_DYNAMIC_LIB)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
 
 .PHONY: compile
 compile:
-	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(_OUTPUT)' build ---
+	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(_DYNAMIC_LIB)' build ---
 -include $(OBJFILES:.o=.d)
 
 .PHONY: clean
 clean:
 	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
-	@$(call DEL,$(_OUTPUT))
-	@$(call DEL,$(LIBDIR)/$(ASSEMBLY).*)
+	@$(call DEL,$(LIBDIR)/$(PREFIX)$(OUTPUT).*)
 	@$(call RM,$(OBJDIR))
 
 # Create object files from source files and generate dependencies
