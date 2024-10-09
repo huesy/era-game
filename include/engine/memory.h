@@ -1,28 +1,31 @@
 #ifndef ENGINE_MEMORY_H
 #define ENGINE_MEMORY_H
 
-#include "engine/defines.h"
+#include "defines.h"
 
 // clang-format off
-#define MEMORY_TAG_UNKNOWN      0
-#define MEMORY_TAG_ARRAY        1
-#define MEMORY_TAG_DARRAY       2
-#define MEMORY_TAG_DICT         3
-#define MEMORY_TAG_RING_QUEUE   4
-#define MEMORY_TAG_BST          5
-#define MEMORY_TAG_STRING       6
-#define MEMORY_TAG_APPLICATION  7
-#define MEMORY_TAG_JOB          8
-#define MEMORY_TAG_TEXTURE      9
-#define MEMORY_TAG_MATERIAL     10
-#define MEMORY_TAG_RENDERER     11
-#define MEMORY_TAG_GAME         12
-#define MEMORY_TAG_TRANSFORM    13
-#define MEMORY_TAG_ENTITY       14
-#define MEMORY_TAG_ENTITY_NODE  15
-#define MEMORY_TAG_SCENE        16
-#define MEMORY_TAG_PLUGIN       17
-// clang-format on
+typedef enum MemoryTag {
+    MEMORY_TAG_UNKNOWN,
+    MEMORY_TAG_ARRAY,
+    MEMORY_TAG_DARRAY,
+    MEMORY_TAG_DICT,
+    MEMORY_TAG_RING_QUEUE,
+    MEMORY_TAG_BST,
+    MEMORY_TAG_STRING,
+    MEMORY_TAG_APPLICATION,
+    MEMORY_TAG_JOB,
+    MEMORY_TAG_TEXTURE,
+    MEMORY_TAG_MATERIAL,
+    MEMORY_TAG_RENDERER,
+    MEMORY_TAG_GAME,
+    MEMORY_TAG_TRANSFORM,
+    MEMORY_TAG_ENTITY,
+    MEMORY_TAG_COMPONENT,
+    MEMORY_TAG_SCENE,
+    MEMORY_TAG_ENTITY_NODE,
+    MEMORY_TAG_PLUGIN,
+    MEMORY_TAG_EDITOR
+} MemoryTag;
 
 typedef struct MemoryStats {
     u64 totalAllocated;
@@ -32,7 +35,7 @@ typedef struct MemoryStats {
     u64 currentUsage;
 } MemoryStats;
 
-b8 memory_system_init(u64 totalSize);
+EngineResult memory_system_init(u64 totalSize);
 void memory_system_shutdown(void);
 
 void *memory_allocate(u64 size, u32 tag);

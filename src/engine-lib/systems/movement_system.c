@@ -1,7 +1,7 @@
 #include "engine/components/position.h"
 #include "engine/components/velocity.h"
-#include "engine/core/logging.h"
 #include "engine/ecs/ecs.h"
+#include "engine/logging.h"
 
 void movement_system_update(ECSManager *ecs, f32 deltaTime) {
     log_info("Updating movement system. ECS: %p, DeltaTime: %f", ecs, deltaTime);

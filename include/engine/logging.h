@@ -1,3 +1,13 @@
+/**
+ * @file logging.h
+ * @author Andrew Hughes (a.hughes@gmail.com)
+ * @brief Logging utility for debug and runtime information.
+ * @version 0.1
+ * @date 2024-10-09
+ *
+ * @copyright Era Engine is Copyright (c) Andrew Hughes 2024
+ */
+
 #ifndef ENGINE_LOGGING_H
 #define ENGINE_LOGGING_H
 

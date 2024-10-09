@@ -1,5 +1,5 @@
 #include "engine/scene/scene_manager.h"
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 
 void scene_manager_load_scene(const char *scene_name) {
     log_info("Loading scene: %s", scene_name);

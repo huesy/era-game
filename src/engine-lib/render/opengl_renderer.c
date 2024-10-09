@@ -1,5 +1,5 @@
 #include "engine/render/opengl_renderer.h"
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 #ifdef PLATFORM_WINDOWS
 // Prevent clang-format from reordering these includes.
 // windows.h must come before gl.h.

@@ -18,7 +18,7 @@ The rendering system provides functions to draw 2D sprites, handle transparency,
 
 ### Initialisation
 
-Call `renderer_initialize()` to set up the rendering context. The specific backend (e.g., OpenGL) will be initialised based on the platform.
+Call `renderer_initialize()` to set up the rendering context. The specific backend (e.g., OpenGL) will be initialized based on the platform.
 
 ### Drawing
 

@@ -1,6 +1,6 @@
 #include "engine/ecs/ecs.h"
-#include "engine/core/logging.h"
-#include "engine/core/memory.h"
+#include "engine/logging.h"
+#include "engine/memory.h"
 
 void ecs_init(ECSManager *ecs) {
     ecs->entityManager.nextEntity = 1; // Start entities from 1.
@@ -18,7 +18,7 @@ void ecs_init(ECSManager *ecs) {
     }
 
     ecs->registeredComponents = 0;
-    log_info("ECS initialised");
+    log_info("ECS initialized");
 }
 
 void ecs_shutdown(ECSManager *ecs) {
@@ -26,7 +26,7 @@ void ecs_shutdown(ECSManager *ecs) {
     for (ComponentType type = 0; type < ecs->registeredComponents; ++type) {
         ComponentArray *componentArray = &ecs->componentArrays[type];
         for (u32 i = 0; i < componentArray->count; ++i) {
-            memory_free(componentArray->components[i]);
+            memory_free(componentArray->components[i], componentArray->size, MEMORY_TAG_COMPONENT);
         }
         componentArray->count = 0;
         componentArray->size = 0;
@@ -128,7 +128,7 @@ void ecs_add_component(ECSManager *ecs, Entity entity, ComponentType type, void 
     }
 
     // Allocate and copy component data to the component array.
-    void *data = memory_allocate(componentArray->size);
+    void *data = memory_allocate(componentArray->size, MEMORY_TAG_COMPONENT);
     if (!data) {
         log_error("Failed to allocate memory for component type %u.", type);
         return;
@@ -166,7 +166,7 @@ void ecs_remove_component(ECSManager *ecs, Entity entity, ComponentType type) {
     }
 
     // Free component memory.
-    memory_free(componentArray->components[index]);
+    memory_free(componentArray->components[index], componentArray->size, MEMORY_TAG_COMPONENT);
 
     // Swap with the last component in the dense array.
     u32 lastIndex = componentArray->count - 1;

@@ -1,23 +1,23 @@
-#include "engine/platform/platform.h"
+#include "engine/platform.h"
 
 #ifdef PLATFORM_LINUX
-
-#    include "engine/core/logging.h"
+#    include "engine/logging.h"
 #    include <dlfcn.h>
+#    include <time.h>
 
 static b8 isRunning = false;
 
-u32 platform_init(PlatformCreateInfo *config) {
+EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
         log_error("Invalid platform configuration.");
-        return 1;
+        return ENGINE_FAILURE;
     }
 
     // TODO: Linux-specific window creation code.
-    log_info("Platform initialised with title: %s, width: %u, height: %u", config->title, config->width, config->height);
+    log_info("Platform initialized with title: %s, width: %u, height: %u", config->title, config->width, config->height);
 
     isRunning = true;
-    return 0;
+    return ENGINE_SUCCESS;
 }
 
 void platform_shutdown(void) {
@@ -66,6 +66,12 @@ void platform_unload_library(void *library) {
     }
 
     dlclose(library);
+}
+
+f32 platform_get_absolute_time(void) {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (f32)ts.tv_sec + (f32)ts.tv_nsec / 1.0e9f;
 }
 
 #endif // PLATFORM_LINUX

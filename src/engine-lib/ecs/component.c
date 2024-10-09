@@ -1,6 +1,6 @@
 #include "engine/ecs/component.h"
-#include "engine/core/logging.h"
-#include "engine/core/memory.h"
+#include "engine/logging.h"
+#include "engine/memory.h"
 
 #define MAX_COMPONENT_TYPES 256
 #define MAX_ENTITIES 1024
@@ -43,17 +43,17 @@ void component_add(Entity entity, ComponentType type, void *data) {
     }
 
     // Allocate memory for the component.
-    Component *component = (Component *)memory_allocate(sizeof(Component));
+    Component *component = (Component *)memory_allocate(sizeof(Component), MEMORY_TAG_COMPONENT);
     if (!component) {
         log_error("Failed to allocate memory for component data.");
         return;
     }
 
     component->type = type;
-    component->data = memory_allocate(componentSizes[type]);
+    component->data = memory_allocate(componentSizes[type], MEMORY_TAG_COMPONENT);
     if (!component->data) {
         log_error("Failed to allocate memory for component data.");
-        memory_free(component);
+        memory_free(component, sizeof(Component), MEMORY_TAG_COMPONENT);
         return;
     }
 
@@ -71,8 +71,8 @@ void component_remove(Entity entity, ComponentType type) {
 
     Component *component = components[entity][type];
     if (component) {
-        memory_free(component->data);
-        memory_free(component);
+        memory_free(component->data, componentSizes[type], MEMORY_TAG_COMPONENT);
+        memory_free(component, sizeof(Component), MEMORY_TAG_COMPONENT);
         components[entity][type] = NULL;
     }
 }

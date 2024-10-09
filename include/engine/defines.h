@@ -100,6 +100,12 @@ typedef _Bool b8;
 /** @brief False value. */
 #define false 0
 
+// Return codes
+typedef u8 EngineResult;
+
+#define ENGINE_SUCCESS 0
+#define ENGINE_FAILURE 1
+
 // Min and max limits
 #define MIN_U8 0U
 #define MIN_U16 0U
@@ -126,6 +132,9 @@ typedef _Bool b8;
 #define INVALID_ID_U64 MAX_U64
 
 // Memory macros
+
+#include <memory.h>
+
 #define ENGINE_ALLOC(size) malloc(size)
 #define ENGINE_FREE(ptr) free(ptr)
 #define ENGINE_COPY(dest, src, size) memcpy(dest, src, size)

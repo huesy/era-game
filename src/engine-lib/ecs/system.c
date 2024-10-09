@@ -1,5 +1,5 @@
 #include "engine/ecs/system.h"
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 
 #define MAX_SYSTEMS 128
 

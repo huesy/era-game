@@ -1,0 +1,70 @@
+You are tasked with assisting in the development of a 2D Game Engine written entirely in the C programming language. The engine must follow these guidelines:
+
+1. Module and Extendable
+ - The architecture must be modular, allowing for easy extension of features and functionality.
+ - Systems should be decoupled to ensure that new modules, components, and features can be easily integrated.
+ - Aim for minimal coupling between game engine modules.
+ - Aim to use a dynamic plugin system so that features and functionality may be used across multiple binaries, for example an editor would require the use of both the game library/plugin and the engine library/plugin.
+
+2. Entity Component System (ECS)
+ - Use an Entity Component System (ECS) pattern to organize game objects. This is crucial for ensuring the scalability and efficiency of the engine.
+ - The system should allow for the dynamic creation and deletion of entities, with components added or removed at runtime.
+ - Efficient memory management and cache-friendly data structures should be prioritized for handling entities and components.
+
+3. Cross-Platform
+ - Ensure the engine can be compiled and executed on multiple platforms including Windows, Linux, MacOS, and more in future, using only platform-specific headers where absolutely necessary (e.g., windows.h for Windows platform-specific operations).
+ - Dynamic library loading is also platform-specific, so ensure that all platform-specific code is organized into the platform-specific source files.
+ - Avoid using any external libraries unless absolutely essential for platform-specific operations.
+
+4. Rendering System
+ - OpenGL will be used as the initial rendering library to create the 2D rendering pipeline.
+ - The rendering system should be easily interchangeable so that in future OpenGL can easily be swapped out for libraries like Vulkan.
+ - Ensure abstraction layers are in place to decouple rendering logic from the core game engine functionality.
+ - The rendering pipeline should support drawing sprites and handling transparency efficiently, and it must be extendable to allow for more advanced features such as shaders, framebuffers, and post-processing effects.
+
+5. Core Systems
+The engine should (at minimum) include the following core systems:
+ - Memory Management
+  - Implement a custom memory management system to efficiently handle allocations and deallocations within the engine. Include support for resource pools, memory arenas, and stack-based allocation where appropriate.
+  - All the memory potentially required by the application should be allocated at the start of the application to limit calls to malloc. All memory functions would work from this initial pool of memory. It should be quite significant.
+  - The memory system should be optimized for managing entities and components in the ECS architecture.
+ - Logging System
+  - Develop a logging system that supports multiple log levels (e.g., trace, debug, info, warning, error, fatal) and can output to various configurable targets (e.g., console, file, Telegram, etc.).
+  - The logging system should be easy to extend and should support conditional compilation, allowing logs to be disabled in release builds.
+ - Input System
+  - Design a system to handle user input (keyboard, mouse, gamepad, touch, and others...) in a cross-platform manner using the platform system.
+  - The input system should allow for flexible mapping of inputs to in-game actions, providing support for different input configurations.
+ - Asset Management System
+  - Implement an asset loading and management system capable of loading textures, sounds, fonts, video, and other game assets.
+  - The system should allow for efficient resource caching and unloading when resources are no longer needed to optimize memory usage.
+ - Scene Management
+  - Include a basic scene management system to handle switching between different game scenes (e.g., splash screens, menus, game levels, etc.)
+  - Ensure that scenes can be loaded/unloaded efficiently, with all associated entities and components properly initialized and destroyed.
+ - Physics System
+  - Implement a basic 2D physics engine capable of handling movement, collision detection, and simple physics behaviours such as gravity and friction.
+  - The system should be easily extendable to include more advanced features, such as collision filtering or rigid body dynamics.
+ - Audio System
+  - Create an audio system to handle sound effects and music playback. This system should allow for the loading and playback of audio assets, as well as volume control, looping, cross-fading, and positional audio for in-game effects.
+ - Event System
+  - Develop an event system to handle asynchronous communication between different parts of the engine (e.g., input events, collision events). This will ensure loose coupling between systems.
+
+6. Dynamic Libraries
+ - The core engine and its components should be built as dynamic libraries (.dll, .so, .dylib) to allow for easy reuse across multiple assemblies.
+ - These dynamic libraries will be utilized by various assemblies, such as:
+  - Editor: A tool that allows developers to create and edit game scenes visually, manage assets, and configure game components. This would make use of the engine, editor, and game libraries.
+  - Game: The final executable that runs the game built using the engine. This would use the engine, and game libraries. In future, it could use the editor library if we wish to make the editor accessible within the game.
+  - Tests: A unit and integration testing environment to ensure that individual systems work correctly, both in isolation and as part of the engine.
+
+7. Editor Tool
+ - The game engine will have a custom editor that provides a visual interface for working with game scenes, entities, components, and assets. This editor will integrate with the core engine to allow for real-time scene manipulation and testing.
+ - The editor will be extendable to allow developers to integrate their own tools and utilities into the interface. It should have support for in-editor debugging, real-time physics simulation, and script editing.
+ - Ensure that the editor can be decoupled from the core engine, running as a separate assembly, but interfacing through the dynamic libraries.
+
+8. Well Commented & Documented
+ - Each module, function, and core data structure must be thoroughly commented. Ensure that explanations are provided for both functionality and design decisions.
+ - Include thoughtful documentation explaining the overall architecture of the engine, how it can be extended, and provide examples of how to implement new systems or components.
+
+9. Well Structured & Industry Competitive
+ - The code must be structured in a way that it could compete with top-tier industry standards. Focus on high-performance, clean code, and clear design patterns.
+ - Maintain modularity without sacrificing performance. Prioritize simplicity in your data structures and logic.
+ - Consider implementing core features that industry engines offer, such as basic physics, rendering, input handling, and memory management.

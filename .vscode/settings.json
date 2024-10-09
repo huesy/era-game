@@ -24,7 +24,9 @@
     "windows.h": "c",
     "iterator": "c",
     "initializer_list": "c",
-    "xutility": "c"
+    "xutility": "c",
+    "memory.h": "c",
+    "ecs.h": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",

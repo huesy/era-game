@@ -18,19 +18,19 @@
 /**
  * @brief Configuration structure for platform initialisation.
  */
-typedef struct PlatformCreateInfo {
+typedef struct PlatformConfig {
     u32 width;         /**< The width of the window to create. */
     u32 height;        /**< The height of the window to create. */
     const char *title; /**< The title of the window to create. */
-} PlatformCreateInfo;
+} PlatformConfig;
 
 /**
  * @brief Initialises the platform, including creating a window if needed.
  *
  * @param config Pointer to the platform configuration structure.
- * @return 0 if initialisation was successful, otherwise an error code.
+ * @return ENGINE_SUCCESS if initialisation was successful, otherwise an error code.
  */
-u32 platform_init(PlatformCreateInfo *config);
+EngineResult platform_init(PlatformConfig *config);
 
 /**
  * @brief Shuts down the platform, cleaning up any resources.
@@ -72,5 +72,12 @@ void *platform_get_library_function(void *library, const char *functionName);
  * @param library The handle to the loaded library.
  */
 void platform_unload_library(void *library);
+
+/**
+ * @brief Retrieves the absolute time in seconds since the platform was started.
+ *
+ * @return f32 The absolute time in seconds.
+ */
+f32 platform_get_absolute_time(void);
 
 #endif // ENGINE_PLATFORM_H

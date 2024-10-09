@@ -1,5 +1,5 @@
 #include "engine/input/input.h"
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 
 static InputAPI *currentInputApi = NULL;
 

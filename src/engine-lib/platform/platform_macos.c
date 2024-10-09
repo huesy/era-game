@@ -1,38 +1,47 @@
-#include "engine/platform/platform.h"
+#include "engine/platform.h"
 
 #ifdef PLATFORM_MACOS
-#    include "engine/core/logging.h"
+#    include "engine/logging.h"
 #    include <dlfcn.h>
+#    include <mach/mach_time.h>
 
-static b8 isRunning = false;
+typedef struct PlatformState {
+    b8 isRunning;
+} PlatformState;
 
-u32 platform_init(PlatformCreateInfo *config) {
+static PlatformState state = {0};
+
+EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
         log_error("Invalid platform configuration.");
-        return 1;
+        return ENGINE_FAILURE;
     }
 
     // TODO: macOS-specific window creation code.
-    log_info("Platform initialised with title: %s, width: %u, height: %u", config->title, config->width, config->height);
+    log_info("Platform initialized with title: %s, width: %u, height: %u", config->title, config->width, config->height);
 
-    isRunning = true;
-    return 0;
+    state.isRunning = true;
+
+    return ENGINE_SUCCESS;
 }
 
 void platform_shutdown(void) {
     // TODO: macOS-specific window shutdown code.
     log_info("Platform shutdown.");
 
-    isRunning = false;
+    state.isRunning = false;
 }
 
 void platform_poll_events(void) {
     // TODO: macOS-specific event polling (e.g., NSApplication run loop).
     log_info("Polling events...");
+
+    // TODO: Setting false to exit loop after one iteration for now.
+    state.isRunning = false;
 }
 
 b8 platform_is_running(void) {
-    return isRunning;
+    return state.isRunning;
 }
 
 void *platform_load_library(const char *path) {
@@ -65,6 +74,21 @@ void platform_unload_library(void *library) {
     }
 
     dlclose(library);
+}
+
+f32 platform_get_absolute_time(void) {
+    static mach_timebase_info_data_t timebase;
+    static bool initialized = false;
+
+    if (!initialized) {
+        mach_timebase_info(&timebase);
+        initialized = true;
+    }
+
+    uint64_t time = mach_absolute_time();
+    f64 seconds = (f64)time * (f64)timebase.numer / (f64)timebase.denom / 1e9;
+
+    return (f32)seconds;
 }
 
 #endif // PLATFORM_MACOS

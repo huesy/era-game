@@ -1,6 +1,6 @@
 #include "engine/ecs/entity.h"
 
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 
 static Entity next_entity_id = 1;
 

@@ -82,7 +82,6 @@ ifeq ($(OS),Windows_NT)
     SHELL := cmd.exe
         
     _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
-    _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).lib
 
     _CFLAGS +=
     _LDFLAGS += -L$(OBJDIR) -shared
@@ -100,7 +99,6 @@ else
         PREFIX := lib
 
         _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
-        _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).a
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared
@@ -117,14 +115,13 @@ else
         PREFIX := lib
 
         _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
-        _STATIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).a
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"
-        DEL = rm -f "$(1)"
+        DEL = rm -rf "$(1)"
         ECHO = echo
     endif
 endif
@@ -152,7 +149,10 @@ compile:
 .PHONY: clean
 clean:
 	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
+	@$(call DEL,$(_DYNAMIC_LIB))
+ifeq ($(PLATFORM),windows)
 	@$(call DEL,$(LIBDIR)/$(PREFIX)$(OUTPUT).*)
+endif
 	@$(call RM,$(OBJDIR))
 
 # Create object files from source files and generate dependencies

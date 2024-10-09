@@ -1,5 +1,5 @@
-#include "engine/core/logging.h"
 #include "engine/input/input.h"
+#include "engine/logging.h"
 
 #ifdef PLATFORM_LINUX
 #    include <X11/Xlib.h>

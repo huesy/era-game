@@ -1,22 +1,22 @@
-#include "engine/platform/platform.h"
+#include "engine/platform.h"
 
 #ifdef PLATFORM_WINDOWS
-#    include "engine/core/logging.h"
+#    include "engine/logging.h"
 #    include <windows.h>
 
 static b8 isRunning = false;
 
-u32 platform_init(PlatformCreateInfo *config) {
+EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
         log_error("Invalid platform configuration.");
-        return 1;
+        return ENGINE_FAILURE;
     }
 
     // TODO: Windows-specific window creation code.
     MessageBoxA(NULL, "Platform initialized.", "Platform", MB_OK);
 
     isRunning = true;
-    return 0;
+    return ENGINE_SUCCESS;
 }
 
 void platform_shutdown(void) {
@@ -73,6 +73,16 @@ void platform_unload_library(void *library) {
     }
 
     FreeLibrary((HMODULE)library);
+}
+
+f32 platform_get_absolute_time(void) {
+    LARGE_INTEGER frequency;
+    QueryPerformanceFrequency(&frequency);
+
+    LARGE_INTEGER counter;
+    QueryPerformanceCounter(&counter);
+
+    return (f32)counter.QuadPart / (f32)frequency.QuadPart;
 }
 
 #endif // PLATFORM_WINDOWS

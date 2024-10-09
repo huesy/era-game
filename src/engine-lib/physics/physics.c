@@ -1,6 +1,6 @@
 #include "engine/physics/physics.h"
 
-#include "engine/core/logging.h"
+#include "engine/logging.h"
 
 #define MAX_RIGIDBODIES 1024
 
