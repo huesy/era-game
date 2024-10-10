@@ -23,12 +23,13 @@ typedef enum MemoryTag {
     MEMORY_TAG_GAME,
     MEMORY_TAG_TRANSFORM,
     MEMORY_TAG_ENTITY,
+    MEMORY_TAG_ENTITY_NODE,
     MEMORY_TAG_COMPONENT,
     MEMORY_TAG_SCENE,
-    MEMORY_TAG_ENTITY_NODE,
     MEMORY_TAG_PLUGIN,
     MEMORY_TAG_EDITOR,
-    MAX_MEMORY_TAGS
+
+    MEMORY_TAG_MAX_TAGS
 } MemoryTag;
 
 /**
@@ -36,11 +37,11 @@ typedef enum MemoryTag {
  * for debugging and performance tracking.
  */
 typedef struct MemoryStats {
-    u64 totalAllocated;                     /*< Total memory allocated by the system. */
-    u64 taggedAllocations[MAX_MEMORY_TAGS]; /*< Total memory allocated per tag type. */
-    u64 totalFreed;                         /*< Total memory that has been freed. */
-    u64 peakUsage;                          /*< Peak memory usage observed. */
-    u64 currentUsage;                       /*< Current total memory usage. */
+    u64 totalAllocated;                         /*< Total memory allocated by the system. */
+    u64 taggedAllocations[MEMORY_TAG_MAX_TAGS]; /*< Total memory allocated per tag type. */
+    u64 totalFreed;                             /*< Total memory that has been freed. */
+    u64 peakUsage;                              /*< Peak memory usage observed. */
+    u64 currentUsage;                           /*< Current total memory usage. */
 } MemoryStats;
 
 /**
@@ -67,7 +68,7 @@ void memory_system_shutdown(void);
  * @param tag Tag to classify the memory allocation.
  * @return void* Pointer to the allocated memory block.
  */
-void *memory_allocate(u64 size, u32 tag);
+ENGINE_API void *memory_allocate(u64 size, u32 tag);
 
 /**
  * @brief Free a block of memory from the main memory pool  with the specified
@@ -77,7 +78,7 @@ void *memory_allocate(u64 size, u32 tag);
  * @param size Size of the memory block to free.
  * @param tag Tag to classify the memory allocation.
  */
-void memory_free(void *block, u64 size, u32 tag);
+ENGINE_API void memory_free(void *block, u64 size, u32 tag);
 
 /**
  * @brief Zero out the memory block with the specified size.
@@ -86,7 +87,7 @@ void memory_free(void *block, u64 size, u32 tag);
  * @param size Size of the memory block to zero out.
  * @return void* Pointer to the zeroed out memory block.
  */
-void *memory_zero(void *block, u64 size);
+ENGINE_API void *memory_zero(void *block, u64 size);
 
 /**
  * @brief Copy memory from the source block to the destination block.
@@ -96,7 +97,7 @@ void *memory_zero(void *block, u64 size);
  * @param size Size of the memory block to copy.
  * @return void* Pointer to the destination memory block.
  */
-void *memory_copy(void *dest, const void *src, u64 size);
+ENGINE_API void *memory_copy(void *dest, const void *src, u64 size);
 
 /**
  * @brief Set the memory block with the specified value.
@@ -106,7 +107,7 @@ void *memory_copy(void *dest, const void *src, u64 size);
  * @param size Size of the memory block to set.
  * @return void* Pointer to the memory block.
  */
-void *memory_set(void *dest, i32 value, u64 size);
+ENGINE_API void *memory_set(void *dest, i32 value, u64 size);
 
 /**
  * @brief Get the memory statistics for the current memory usage.
@@ -124,12 +125,12 @@ MemoryStats memory_get_stats(void);
  * @param size Size of the temporary memory block to allocate.
  * @return void* Pointer to the allocated temporary memory block.
  */
-void *memory_allocate_temporary(u64 size);
+ENGINE_API void *memory_allocate_temporary(u64 size);
 
 /**
  * @brief Reset the temporary memory pool to the initial state and free all
  * temporary memory allocations.
  */
-void memory_reset_temporary(void);
+ENGINE_API void memory_reset_temporary(void);
 
 #endif // ENGINE_MEMORY_H

@@ -210,11 +210,11 @@ void memory_system_shutdown(void) {
     log_info("Memory system shut down. Total allocated: %llu bytes.", memoryStats.totalAllocated);
 }
 
-void *memory_allocate(u64 size, u32 tag) {
+ENGINE_API void *memory_allocate(u64 size, u32 tag) {
     return allocate_from_pool(&mainPool, size, tag);
 }
 
-void memory_free(void *block, u64 size, u32 tag) {
+ENGINE_API void memory_free(void *block, u64 size, u32 tag) {
     if (!block) {
         return;
     }
@@ -248,15 +248,15 @@ void memory_free(void *block, u64 size, u32 tag) {
 #endif
 }
 
-void *memory_zero(void *block, u64 size) {
+ENGINE_API void *memory_zero(void *block, u64 size) {
     return ENGINE_ZERO(block, size);
 }
 
-void *memory_copy(void *dest, const void *src, u64 size) {
+ENGINE_API void *memory_copy(void *dest, const void *src, u64 size) {
     return ENGINE_COPY(dest, src, size);
 }
 
-void *memory_set(void *dest, i32 value, u64 size) {
+ENGINE_API void *memory_set(void *dest, i32 value, u64 size) {
     return ENGINE_SET(dest, value, size);
 }
 
@@ -264,11 +264,11 @@ MemoryStats memory_get_stats(void) {
     return memoryStats;
 }
 
-void *memory_allocate_temporary(u64 size) {
+ENGINE_API void *memory_allocate_temporary(u64 size) {
     return allocate_from_pool(&tempPool, size, MEMORY_TAG_UNKNOWN);
 }
 
-void memory_reset_temporary(void) {
+ENGINE_API void memory_reset_temporary(void) {
     // TODO: Move to platform system
 #if defined(PLATFORM_WINDOWS)
     EnterCriticalSection(&tempPool.lock);

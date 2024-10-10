@@ -43,6 +43,9 @@ b8 platform_is_running(void) {
     return isRunning;
 }
 
+// =============================================================================
+// Dynamic Library Loading
+
 void *platform_load_library(const char *path) {
     if (!path) {
         log_error("Invalid library path.");
@@ -85,6 +88,30 @@ f32 platform_get_absolute_time(void) {
     return (f32)counter.QuadPart / (f32)frequency.QuadPart;
 }
 
+// =============================================================================
+// Memory
+
+void *platform_memory_allocate(u64 size) {
+    return (void *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
+}
+
+void platform_memory_free(void *block) {
+    HeapFree(GetProcessHeap(), 0, block);
+}
+
+void *platform_memory_copy(void *dest, const void *src, u64 size) {
+    return memcpy(dest, src, size);
+}
+
+void *platform_memory_set(void *dest, i32 value, u64 size) {
+    return memset(dest, value, size);
+}
+
+void *platform_memory_zero(void *block, u64 size) {
+    return memset(block, 0, size);
+}
+
+// =============================================================================
 // Threading
 
 void platform_mutex_init(void *lock) {

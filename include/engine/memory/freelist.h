@@ -5,29 +5,27 @@
 #include "engine/platform.h"
 
 /**
- * @brief Define a FreeListNode structure to keep track of free memory blocks.
+ * @brief A free list node that keeps track of free blocks.
  */
 typedef struct FreeListNode {
-    u64 size;                  /*< Size of the free block. */
-    struct FreeListNode *next; /*< Pointer to the next free block in the list. */
+    struct FreeListNode *next; /*< Pointer to the next node in the free list. */
+    u64 size;                  /*< Size of the current block, including any padding. */
 } FreeListNode;
 
 /**
- * @brief Define a FreeList structure to manage free memory blocks.
+ * @brief The FreeList structure is used to manage memory allocations.
  */
 typedef struct FreeList {
-    FreeListNode *head; /*< Pointer to the head of the free list. */
-    FreeListNode *tail; /*< Pointer to the tail of the free list. */
-    u64 count;          /*< Number of free blocks in the list. */
-    u64 total;          /*< Total size of all free blocks in the list. */
-    u64 capacity;       /*< Total capacity of the free list. */
+    FreeListNode *head; /*< Head node of the free list. */
+    u64 totalFree;      /*< Total size of all available free blocks. */
     PlatformMutex lock; /*< Mutex lock for thread safety. */
 } FreeList;
 
 /**
- * @brief Initialize the free list.
+ * @brief Initialize a FreeList structure.
  *
- * @param freelist Pointer to the free list to initialize.
+ * @param freelist Pointer to the free list structure to initialize.
+ * @param memoryPool
  */
 void freelist_init(FreeList *freelist);
 

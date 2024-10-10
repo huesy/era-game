@@ -59,6 +59,16 @@ void platform_poll_events(void);
 b8 platform_is_running(void);
 
 /**
+ * @brief Retrieves the absolute time in seconds since the platform was started.
+ *
+ * @return f32 The absolute time in seconds.
+ */
+f32 platform_get_absolute_time(void);
+
+// =============================================================================
+// Dynamic Library Loading
+
+/**
  * @brief Loads a dynamic library from the given path.
  *
  * @param path The path to the dynamic library to load.
@@ -82,12 +92,56 @@ void *platform_get_library_function(void *library, const char *functionName);
  */
 void platform_unload_library(void *library);
 
+// =============================================================================
+// Memory
+
 /**
- * @brief Retrieves the absolute time in seconds since the platform was started.
+ * @brief Allocates a block of memory from the platform.
  *
- * @return f32 The absolute time in seconds.
+ * @param size Size of the memory block to allocate.
+ * @param alignment Alignment of the memory block.
+ * @return void* Pointer to the allocated memory block.
  */
-f32 platform_get_absolute_time(void);
+void *platform_memory_allocate(u64 size, u16 alignment);
+
+/**
+ * @brief Frees a block of memory from the platform.
+ *
+ * @param block Pointer to the memory block to free.
+ */
+void platform_memory_free(void *block);
+
+/**
+ * @brief Copy memory from the source block to the destination block.
+ *
+ * @param dest Pointer to the destination memory block.
+ * @param src Pointer to the source memory block that will be copied.
+ * @param size Size of the memory block to copy.
+ * @return void* Pointer to the destination memory block.
+ */
+void *platform_memory_copy(void *dest, const void *src, u64 size);
+
+/**
+ * @brief Set the memory block with the specified value.
+ *
+ * @param dest Pointer to the memory block to set.
+ * @param value Value to set the memory block to.
+ * @param size Size of the memory block to set.
+ * @return void* Pointer to the memory block.
+ */
+void *platform_memory_set(void *dest, i32 value, u64 size);
+
+/**
+ * @brief Zero out the memory block with the specified size.
+ *
+ * @param block Pointer to the memory block to zero out.
+ * @param size Size of the memory block to zero out.
+ * @return void* Pointer to the zeroed out memory block.
+ */
+void *platform_memory_zero(void *block, u64 size);
+
+// =============================================================================
+// Threading
 
 /**
  * @brief Initializes a mutex lock for thread safety.
