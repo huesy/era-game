@@ -9,6 +9,7 @@
  */
 typedef enum MemoryTag {
     MEMORY_TAG_UNKNOWN,
+    MEMORY_TAG_ARENA,
     MEMORY_TAG_ARRAY,
     MEMORY_TAG_DARRAY,
     MEMORY_TAG_DICT,

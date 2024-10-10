@@ -9,7 +9,7 @@ static b8 isRunning = false;
 EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
         log_error("Invalid platform configuration.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR;
     }
 
     // TODO: Windows-specific window creation code.

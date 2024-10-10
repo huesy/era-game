@@ -22,8 +22,7 @@ typedef struct EngineConfig {
  * @brief Initializes the engine.
  *
  * @param config Engine configuration.
- * @return ENGINE_SUCCESS if the engine was initialized successfully, otherwise
- * ENGINE_FAILURE.
+ * @return ENGINE_SUCCESS if the engine was initialized successfully, otherwise an error code.
  */
 ENGINE_API EngineResult engine_init(EngineConfig *config);
 

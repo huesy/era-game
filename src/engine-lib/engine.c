@@ -10,7 +10,7 @@ EngineResult engine_init(EngineConfig *config) {
     // Initialize memory system.
     if (memory_system_init(config->memoryPoolSize) != ENGINE_SUCCESS) {
         log_error("Failed to initialize memory system.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR;
     }
 
     PlatformConfig platformConfig = {0};
@@ -20,7 +20,7 @@ EngineResult engine_init(EngineConfig *config) {
 
     if (platform_init(&platformConfig) != ENGINE_SUCCESS) {
         log_error("Failed to initialize platform.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR;
     }
 
     log_info("Engine initialized successfully.");

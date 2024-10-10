@@ -26,7 +26,10 @@
     "initializer_list": "c",
     "xutility": "c",
     "memory.h": "c",
-    "ecs.h": "c"
+    "ecs.h": "c",
+    "platform.h": "c",
+    "__config": "c",
+    "_ptrdiff_t.h": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",

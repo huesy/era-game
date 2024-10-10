@@ -22,12 +22,12 @@ typedef struct FreeList {
 } FreeList;
 
 /**
- * @brief Initialize a FreeList structure.
+ * @brief Creates a new freelist.
  *
  * @param freelist Pointer to the free list structure to initialize.
  * @param memoryPool
  */
-void freelist_init(FreeList *freelist);
+void freelist_create(FreeList *freelist);
 
 /**
  * @brief Destroys the free list.

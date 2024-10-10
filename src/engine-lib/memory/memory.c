@@ -166,7 +166,7 @@ EngineResult memory_system_init(u64 totalSize) {
     // Memory allocation failed.
     if (!mainPool.memory) {
         log_error("Failed to allocate main memory pool.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR;
     }
 
     mainPool.capacity = mainPoolSize;
@@ -181,7 +181,7 @@ EngineResult memory_system_init(u64 totalSize) {
     if (!tempPool.memory) {
         ENGINE_FREE(mainPool.memory);
         log_error("Failed to allocate temporary memory pool.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR;
     }
 
     tempPool.capacity = tempPoolSize;

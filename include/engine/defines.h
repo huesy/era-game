@@ -101,7 +101,12 @@ typedef _Bool b8;
 #define false 0
 
 // Return codes
-typedef u8 EngineResult;
+typedef enum EngineResult {
+    ENGINE_SUCCESS = 0,
+    ENGINE_ERROR,
+    ENGINE_ERROR_ALLOCATION_FAILED,
+    ENGINE_ERROR_INVALID_ARGUMENT,
+} EngineResult;
 
 #define ENGINE_SUCCESS 0
 #define ENGINE_FAILURE 1
@@ -142,12 +147,17 @@ typedef u8 EngineResult;
 #define ENGINE_ZERO(ptr, size) ENGINE_SET(ptr, 0, size)
 
 // Error handling macros
-#define ENGINE_ASSERT(cond, msg)                                                                  \
-    do {                                                                                          \
-        if (!(cond)) {                                                                            \
-            fprintf(stderr, "Assertion failed: %s, file %s, line %d\n", msg, __FILE__, __LINE__); \
-            abort();                                                                              \
-        }                                                                                         \
-    } while (0)
+#ifdef _DEBUG
+#    define ENGINE_ASSERT(condition, message)                               \
+        do {                                                                \
+            if (!(condition)) {                                             \
+                log_error("[ASSERT] %s\nFile: %s\nLine: %d\nMessage: %s\n", \
+                          #condition, __FILE__, __LINE__, message);         \
+                abort();                                                    \
+            }                                                               \
+        } while (0)
+#else
+#    define ENGINE_ASSERT(condition, message) ((void)0)
+#endif
 
 #endif // DEFINES_H

@@ -8,7 +8,7 @@ ENGINE_API EngineResult editor_init(void) {
     state = memory_allocate(sizeof(EditorState), MEMORY_TAG_EDITOR);
     if (!state) {
         log_error("Failed to allocate memory for editor state.");
-        return ENGINE_FAILURE;
+        return ENGINE_ERROR_ALLOCATION_FAILED;
     }
 
     memory_zero(state, sizeof(EditorState));
