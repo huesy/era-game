@@ -85,4 +85,42 @@ f32 platform_get_absolute_time(void) {
     return (f32)counter.QuadPart / (f32)frequency.QuadPart;
 }
 
+// Threading
+
+void platform_mutex_init(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    InitializeCriticalSection((CRITICAL_SECTION *)lock);
+}
+
+void platform_mutex_lock(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    EnterCriticalSection((CRITICAL_SECTION *)lock);
+}
+
+void platform_mutex_unlock(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    LeaveCriticalSection((CRITICAL_SECTION *)lock);
+}
+
+void platform_mutex_destroy(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    DeleteCriticalSection((CRITICAL_SECTION *)lock);
+}
+
 #endif // PLATFORM_WINDOWS

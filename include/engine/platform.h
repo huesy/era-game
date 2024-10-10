@@ -15,6 +15,15 @@
 
 #include "engine/defines.h"
 
+// Threading
+#if defined(PLATFORM_WINDOWS)
+#    include <windows.h>
+typedef CRITICAL_SECTION PlatformMutex;
+#else
+#    include <pthread.h>
+typedef pthread_mutex_t PlatformMutex;
+#endif
+
 /**
  * @brief Configuration structure for platform initialisation.
  */
@@ -79,5 +88,33 @@ void platform_unload_library(void *library);
  * @return f32 The absolute time in seconds.
  */
 f32 platform_get_absolute_time(void);
+
+/**
+ * @brief Initializes a mutex lock for thread safety.
+ *
+ * @param lock Pointer to the mutex lock to initialize.
+ */
+void platform_mutex_init(void *lock);
+
+/**
+ * @brief Locks a mutex lock for thread safety.
+ *
+ * @param lock Pointer to the mutex lock to lock.
+ */
+void platform_mutex_lock(void *lock);
+
+/**
+ * @brief Unlocks a mutex lock for thread safety.
+ *
+ * @param lock Pointer to the mutex lock to unlock.
+ */
+void platform_mutex_unlock(void *lock);
+
+/**
+ * @brief Destroys a mutex lock for thread safety.
+ *
+ * @param lock Pointer to the mutex lock to destroy.
+ */
+void platform_mutex_destroy(void *lock);
 
 #endif // ENGINE_PLATFORM_H

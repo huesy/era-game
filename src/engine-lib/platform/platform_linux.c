@@ -3,6 +3,7 @@
 #ifdef PLATFORM_LINUX
 #    include "engine/logging.h"
 #    include <dlfcn.h>
+#    include <pthread.h>
 #    include <time.h>
 
 static b8 isRunning = false;
@@ -72,6 +73,44 @@ f32 platform_get_absolute_time(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return (f32)ts.tv_sec + (f32)ts.tv_nsec / 1.0e9f;
+}
+
+// Threading
+
+void platform_mutex_init(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    pthread_mutex_init((pthread_mutex_t *)lock, NULL);
+}
+
+void platform_mutex_lock(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    pthread_mutex_lock((pthread_mutex_t *)lock);
+}
+
+void platform_mutex_unlock(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    pthread_mutex_unlock((pthread_mutex_t *)lock);
+}
+
+void platform_mutex_destroy(void *lock) {
+    if (!lock) {
+        log_error("Invalid mutex lock.");
+        return;
+    }
+
+    pthread_mutex_destroy((pthread_mutex_t *)lock);
 }
 
 #endif // PLATFORM_LINUX
