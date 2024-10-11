@@ -49,12 +49,12 @@ REM Engine core library
 make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="%ENGINE_LINK%"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
-@REM REM Game library
-@REM make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/lib -lengine"
-@REM IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
+REM Game library
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin -lengine"
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Editor library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 @REM --------------------------------------------------------------------------
@@ -62,11 +62,11 @@ IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 @REM --------------------------------------------------------------------------
 
 REM Editor
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -leditor -lgame"
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine -leditor -lgame"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
-@REM REM Game
-@REM make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\lib -lengine -lgame"
-@REM IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
+REM Game
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine -lgame"
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 ECHO All assemblies %ACTION_STR_PAST% successfully.

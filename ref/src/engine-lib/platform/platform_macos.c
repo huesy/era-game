@@ -1,12 +1,16 @@
 #include "engine/platform.h"
 
-#ifdef PLATFORM_LINUX
+#ifdef PLATFORM_MACOS
 #    include "engine/logging.h"
 #    include <dlfcn.h>
+#    include <mach/mach_time.h>
 #    include <pthread.h>
-#    include <time.h>
 
-static b8 isRunning = false;
+typedef struct PlatformState {
+    b8 isRunning;
+} PlatformState;
+
+static PlatformState state = {0};
 
 EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
@@ -14,44 +18,47 @@ EngineResult platform_init(PlatformConfig *config) {
         return ENGINE_ERROR;
     }
 
-    // TODO: Linux-specific window creation code.
+    // TODO: macOS-specific window creation code.
     log_info("Platform initialized with title: %s, width: %u, height: %u", config->title, config->width, config->height);
 
-    isRunning = true;
+    state.isRunning = true;
+
     return ENGINE_SUCCESS;
 }
 
 void platform_shutdown(void) {
-    // TODO: Linux-specific window shutdown code.
+    // TODO: macOS-specific window shutdown code.
     log_info("Platform shutdown.");
 
-    isRunning = false;
+    state.isRunning = false;
 }
 
 void platform_poll_events(void) {
-    // TODO: Linux-specific event polling (e.g., X11 event loop).
+    // TODO: macOS-specific event polling (e.g., NSApplication run loop).
     log_info("Polling events...");
+
+    // TODO: Setting false to exit loop after one iteration for now.
+    state.isRunning = false;
 }
 
 b8 platform_is_running(void) {
-    return isRunning;
+    return state.isRunning;
 }
 
 f32 platform_get_absolute_time(void) {
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (f32)ts.tv_sec + (f32)ts.tv_nsec / 1.0e9f;
+    static mach_timebase_info_data_t timebase;
+    static bool initialized = false;
+
+    if (!initialized) {
+        mach_timebase_info(&timebase);
+        initialized = true;
+    }
+
+    uint64_t time = mach_absolute_time();
+    f64 seconds = (f64)time * (f64)timebase.numer / (f64)timebase.denom / 1e9;
+
+    return (f32)seconds;
 }
-
-// =============================================================================
-// Windowing
-
-void *platform_create_window(WindowConfig *config);
-void platform_destroy_window(void *window);
-u32 platform_get_window_width(void *window);
-u32 platform_get_window_height(void *window);
-void platform_set_window_title(void *window, const char *title);
-b8 platform_is_window_open(void *window);
 
 // =============================================================================
 // Dynamic Library Loading
@@ -150,4 +157,4 @@ void platform_mutex_destroy(void *lock) {
     pthread_mutex_destroy((pthread_mutex_t *)lock);
 }
 
-#endif // PLATFORM_LINUX
+#endif // PLATFORM_MACOS

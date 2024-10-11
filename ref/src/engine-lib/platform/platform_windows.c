@@ -4,36 +4,34 @@
 #    include "engine/logging.h"
 #    include <windows.h>
 
-typedef struct PlatformState {
-    b8 isRunning;
-} PlatformState;
+static b8 isRunning = false;
 
-static PlatformState state = {0};
-
-ENGINE_API EngineResult platform_init(PlatformConfig *config) {
+EngineResult platform_init(PlatformConfig *config) {
     if (!config) {
         log_error("Invalid platform configuration.");
         return ENGINE_ERROR;
     }
 
-    state.isRunning = true;
+    // TODO: Windows-specific window creation code.
+    MessageBoxA(NULL, "Platform initialized.", "Platform", MB_OK);
 
+    isRunning = true;
     return ENGINE_SUCCESS;
 }
 
-ENGINE_API void platform_shutdown(void) {
+void platform_shutdown(void) {
     // TODO: Windows-specific window shutdown code.
     MessageBoxA(NULL, "Platform shutdown.", "Platform", MB_OK);
 
-    state.isRunning = false;
+    isRunning = false;
 }
 
-ENGINE_API void platform_poll_events(void) {
+void platform_poll_events(void) {
     // TODO: Windows-specific event polling (e.g., PeekMessage or GetMEssage loop).
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT) {
-            state.isRunning = false;
+            isRunning = false;
         } else {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -41,74 +39,14 @@ ENGINE_API void platform_poll_events(void) {
     }
 }
 
-ENGINE_API b8 platform_is_running(void) {
-    return state.isRunning;
+b8 platform_is_running(void) {
+    return isRunning;
 }
-
-// =============================================================================
-// Windowing
-
-LRESULT CALLBACK WindowProc(
-    HWND hwnd,
-    UINT msg,
-    WPARAM wParam,
-    LPARAM lParam) {
-
-    LRESULT result = 0;
-
-    switch (msg) {
-        case WM_SIZE: {
-            OutputDebugStringA("WM_SIZE\n");
-        } break;
-        case WM_CLOSE: {
-            OutputDebugStringA("WM_CLOSE\n");
-        } break;
-        case WM_DESTROY: {
-            OutputDebugStringA("WM_DESTROY\n");
-            PostQuitMessage(0);
-        } break;
-        case WM_ACTIVATEAPP: {
-            OutputDebugStringA("WM_ACTIVATEAPP\n");
-        } break;
-        default: {
-            result = DefWindowProc(hwnd, msg, wParam, lParam);
-        } break;
-    }
-
-    return result;
-}
-
-ENGINE_API void *platform_create_window(WindowConfig *config) {
-    if (!config) {
-        log_error("Invalid window configuration.");
-        return NULL;
-    }
-
-    log_info("Creating window: %dx%d - %s", config->width, config->height, config->title);
-
-    WNDCLASS windowClass = {0};
-    // TODO(Andrew): Check if HREDRAW and VREDRAW are needed.
-    windowClass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-    windowClass.lpfnWndProc = WindowProc;
-    windowClass.hInstance = GetModuleHandle(NULL);
-    // windowClass.hIcon;
-    windowClass.lpszClassName = "EngineWindowClass";
-
-    ENGINE_UNUSED(windowClass);
-
-    return NULL;
-}
-
-ENGINE_API void platform_destroy_window(void *window);
-ENGINE_API u32 platform_get_window_width(void *window);
-ENGINE_API u32 platform_get_window_height(void *window);
-ENGINE_API void platform_set_window_title(void *window, const char *title);
-ENGINE_API b8 platform_is_window_open(void *window);
 
 // =============================================================================
 // Dynamic Library Loading
 
-ENGINE_API void *platform_load_library(const char *path) {
+void *platform_load_library(const char *path) {
     if (!path) {
         log_error("Invalid library path.");
         return NULL;
@@ -117,7 +55,7 @@ ENGINE_API void *platform_load_library(const char *path) {
     return (void *)LoadLibraryA(path);
 }
 
-ENGINE_API void *platform_get_library_function(void *library, const char *functionName) {
+void *platform_get_library_function(void *library, const char *functionName) {
     if (!library) {
         log_error("Invalid library handle.");
         return NULL;
@@ -131,7 +69,7 @@ ENGINE_API void *platform_get_library_function(void *library, const char *functi
     return (void *)GetProcAddress((HMODULE)library, functionName);
 }
 
-ENGINE_API void platform_unload_library(void *library) {
+void platform_unload_library(void *library) {
     if (!library) {
         log_error("Invalid library handle.");
         return;
@@ -140,7 +78,7 @@ ENGINE_API void platform_unload_library(void *library) {
     FreeLibrary((HMODULE)library);
 }
 
-ENGINE_API f32 platform_get_absolute_time(void) {
+f32 platform_get_absolute_time(void) {
     LARGE_INTEGER frequency;
     QueryPerformanceFrequency(&frequency);
 
@@ -153,8 +91,7 @@ ENGINE_API f32 platform_get_absolute_time(void) {
 // =============================================================================
 // Memory
 
-void *platform_memory_allocate(u64 size, u16 alignment) {
-    ENGINE_UNUSED(alignment);
+void *platform_memory_allocate(u64 size) {
     return (void *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, size);
 }
 

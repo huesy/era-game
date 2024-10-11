@@ -44,16 +44,6 @@ f32 platform_get_absolute_time(void) {
 }
 
 // =============================================================================
-// Windowing
-
-void *platform_create_window(WindowConfig *config);
-void platform_destroy_window(void *window);
-u32 platform_get_window_width(void *window);
-u32 platform_get_window_height(void *window);
-void platform_set_window_title(void *window, const char *title);
-b8 platform_is_window_open(void *window);
-
-// =============================================================================
 // Dynamic Library Loading
 
 void *platform_load_library(const char *path) {

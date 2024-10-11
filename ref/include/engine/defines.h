@@ -160,7 +160,4 @@ typedef enum EngineResult {
 #    define ENGINE_ASSERT(condition, message) ((void)0)
 #endif
 
-// Unused parameter macro
-#define ENGINE_UNUSED(x) (void)(x)
-
 #endif // DEFINES_H

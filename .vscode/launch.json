@@ -2,69 +2,55 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug Game",
-      "type": "cppdbg",
-      "request": "launch",
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/build/bin/",
-      "environment": [],
-      "program": "${workspaceFolder}/build/bin/game",
-      "osx": {
-        "MIMode": "lldb",
-        "targetArchitecture": "arm64",
-        "externalConsole": false,
-      },
-      "linux": {
-        "externalConsole": false,
-      },
-      "windows": {
-        "type": "cppvsdbg",
-        "program": "${workspaceFolder}/build/bin/game.exe",
-        "externalConsole": false,
-      },
-    },
-    {
-      "name": "Debug Testbed",
-      "type": "cppdbg",
-      "request": "launch",
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/build/bin/",
-      "environment": [],
-      "program": "${workspaceFolder}/build/bin/testbed",
-      "osx": {
-        "MIMode": "lldb",
-        "targetArchitecture": "arm64",
-        "externalConsole": false,
-      },
-      "linux": {
-        "externalConsole": false,
-      },
-      "windows": {
-        "type": "cppvsdbg",
-        "program": "${workspaceFolder}/build/bin/testbed.exe",
-        "externalConsole": false,
-      },
-    },
-    {
       "name": "Debug Editor",
       "type": "cppdbg",
       "request": "launch",
       "stopAtEntry": false,
-      "cwd": "${workspaceFolder}/build/bin/",
       "environment": [],
-      "program": "${workspaceFolder}/build/bin/editor",
       "osx": {
         "MIMode": "lldb",
         "targetArchitecture": "arm64",
+        "cwd": "${workspaceFolder}/build/macos/bin",
+        "program": "${workspaceFolder}/build/macos/bin/editor",
         "externalConsole": false,
       },
       "linux": {
+        "cwd": "${workspaceFolder}/build/linux/bin",
+        "program": "${workspaceFolder}/build/linux/bin/editor",
         "externalConsole": false,
       },
       "windows": {
         "type": "cppvsdbg",
-        "program": "${workspaceFolder}/build/bin/editor.exe",
+        // cppvsdbg requires this instead of externalConsole
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}\\build\\windows\\bin",
+        "program": "${workspaceFolder}\\build\\windows\\bin\\editor.exe",
+      },
+    },
+    {
+      "name": "Debug Game",
+      "type": "cppdbg",
+      "request": "launch",
+      "stopAtEntry": false,
+      "environment": [],
+      "osx": {
+        "MIMode": "lldb",
+        "targetArchitecture": "arm64",
+        "cwd": "${workspaceFolder}/build/macos/bin",
+        "program": "${workspaceFolder}/build/macos/bin/editor",
         "externalConsole": false,
+      },
+      "linux": {
+        "cwd": "${workspaceFolder}/build/linux/bin",
+        "program": "${workspaceFolder}/build/linux/bin/editor",
+        "externalConsole": false,
+      },
+      "windows": {
+        "type": "cppvsdbg",
+        // cppvsdbg requires this instead of externalConsole
+        "console": "integratedTerminal",
+        "cwd": "${workspaceFolder}\\build\\windows\\bin",
+        "program": "${workspaceFolder}\\build\\windows\\bin\\editor.exe",
       },
     },
   ],

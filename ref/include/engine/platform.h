@@ -27,17 +27,10 @@ typedef pthread_mutex_t PlatformMutex;
 /**
  * @brief Configuration structure for platform initialisation.
  */
-typedef struct WindowConfig {
+typedef struct PlatformConfig {
     u32 width;         /**< The width of the window to create. */
     u32 height;        /**< The height of the window to create. */
     const char *title; /**< The title of the window to create. */
-} WindowConfig;
-
-/**
- * @brief Configuration structure for platform initialisation.
- */
-typedef struct PlatformConfig {
-    WindowConfig window; /**< Configuration for the window to create. */
 } PlatformConfig;
 
 /**
@@ -46,81 +39,31 @@ typedef struct PlatformConfig {
  * @param config Pointer to the platform configuration structure.
  * @return ENGINE_SUCCESS if initialisation was successful, otherwise an error code.
  */
-ENGINE_API EngineResult platform_init(PlatformConfig *config);
+EngineResult platform_init(PlatformConfig *config);
 
 /**
  * @brief Shuts down the platform, cleaning up any resources.
  */
-ENGINE_API void platform_shutdown(void);
+void platform_shutdown(void);
 
 /**
  * @brief Polls the platform for events such as input or window events.
  */
-ENGINE_API void platform_poll_events(void);
+void platform_poll_events(void);
 
 /**
  * @brief Checks if the platform is still running.
  *
  * @return b8 True if the platform is running, false otherwise.
  */
-ENGINE_API b8 platform_is_running(void);
+b8 platform_is_running(void);
 
 /**
  * @brief Retrieves the absolute time in seconds since the platform was started.
  *
  * @return f32 The absolute time in seconds.
  */
-ENGINE_API f32 platform_get_absolute_time(void);
-
-// =============================================================================
-// Windowing
-
-/**
- * @brief Creates a window with the specified configuration.
- *
- * @param config Pointer to the platform configuration structure.
- * @return void* A handle to the created window, or NULL if an error occurred.
- */
-ENGINE_API void *platform_create_window(WindowConfig *config);
-
-/**
- * @brief Destroys the window.
- *
- * @param window Pointer to the window to destroy.
- */
-ENGINE_API void platform_destroy_window(void *window);
-
-/**
- * @brief Retrieves the width of the window.
- *
- * @param window Pointer to the window.
- * @return u32 The width of the window.
- */
-ENGINE_API u32 platform_get_window_width(void *window);
-
-/**
- * @brief Retrieves the height of the window.
- *
- * @param window Pointer to the window.
- * @return u32 The height of the window.
- */
-ENGINE_API u32 platform_get_window_height(void *window);
-
-/**
- * @brief Sets the title of the window.
- *
- * @param window Pointer to the window.
- * @param title The title of the window.
- */
-ENGINE_API void platform_set_window_title(void *window, const char *title);
-
-/**
- * @brief Checks if the window is still open.
- *
- * @param window Pointer to the window.
- * @return b8 True if the window is open, false otherwise.
- */
-ENGINE_API b8 platform_is_window_open(void *window);
+f32 platform_get_absolute_time(void);
 
 // =============================================================================
 // Dynamic Library Loading
@@ -131,7 +74,7 @@ ENGINE_API b8 platform_is_window_open(void *window);
  * @param path The path to the dynamic library to load.
  * @return void* A handle to the loaded library, or NULL if an error occurred.
  */
-ENGINE_API void *platform_load_library(const char *path);
+void *platform_load_library(const char *path);
 
 /**
  * @brief Retrieves a function pointer from a loaded dynamic library.
@@ -140,14 +83,14 @@ ENGINE_API void *platform_load_library(const char *path);
  * @param functionName The name of the function to retrieve.
  * @return void* A pointer to the function, or NULL if an error occurred.
  */
-ENGINE_API void *platform_get_library_function(void *library, const char *functionName);
+void *platform_get_library_function(void *library, const char *functionName);
 
 /**
  * @brief Unloads a dynamic library.
  *
  * @param library The handle to the loaded library.
  */
-ENGINE_API void platform_unload_library(void *library);
+void platform_unload_library(void *library);
 
 // =============================================================================
 // Memory

@@ -114,10 +114,8 @@ void memory_arena_reset(MemoryArena *arena) {
     ENGINE_ASSERT(arena != NULL, "Arena pointer cannot be NULL.");
 
     platform_mutex_lock(&arena->mutex);
-
     arena->used = 0;
     arena->marker = 0;
-
     platform_mutex_unlock(&arena->mutex);
 
     log_debug("Memory arena reset.");

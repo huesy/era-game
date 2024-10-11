@@ -11,17 +11,6 @@
 #endif
 
 /**
- * @brief Define a FreeBlock structure to keep track of free memory blocks.
- *
- * This structure represents a free block of memory, used to manage the free
- * list of the memory pool.
- */
-typedef struct FreeBlock {
-    u64 size;               /*< Size of the free block. */
-    struct FreeBlock *next; /*< Pointer to the next free block in the list. */
-} FreeBlock;
-
-/**
  * @brief Memory pool structure to manage memory allocation.
  *
  * Represents a memory pool that can allocate and deallocate memory blocks from
@@ -166,7 +155,7 @@ EngineResult memory_system_init(u64 totalSize) {
     // Memory allocation failed.
     if (!mainPool.memory) {
         log_error("Failed to allocate main memory pool.");
-        return ENGINE_ERROR;
+        return ENGINE_FAILURE;
     }
 
     mainPool.capacity = mainPoolSize;
@@ -181,7 +170,7 @@ EngineResult memory_system_init(u64 totalSize) {
     if (!tempPool.memory) {
         ENGINE_FREE(mainPool.memory);
         log_error("Failed to allocate temporary memory pool.");
-        return ENGINE_ERROR;
+        return ENGINE_FAILURE;
     }
 
     tempPool.capacity = tempPoolSize;
@@ -210,11 +199,11 @@ void memory_system_shutdown(void) {
     log_info("Memory system shut down. Total allocated: %llu bytes.", memoryStats.totalAllocated);
 }
 
-ENGINE_API void *memory_allocate(u64 size, u32 tag) {
+void *memory_allocate(u64 size, u32 tag) {
     return allocate_from_pool(&mainPool, size, tag);
 }
 
-ENGINE_API void memory_free(void *block, u64 size, u32 tag) {
+void memory_free(void *block, u64 size, u32 tag) {
     if (!block) {
         return;
     }
@@ -248,15 +237,15 @@ ENGINE_API void memory_free(void *block, u64 size, u32 tag) {
 #endif
 }
 
-ENGINE_API void *memory_zero(void *block, u64 size) {
+void *memory_zero(void *block, u64 size) {
     return ENGINE_ZERO(block, size);
 }
 
-ENGINE_API void *memory_copy(void *dest, const void *src, u64 size) {
+void *memory_copy(void *dest, const void *src, u64 size) {
     return ENGINE_COPY(dest, src, size);
 }
 
-ENGINE_API void *memory_set(void *dest, i32 value, u64 size) {
+void *memory_set(void *dest, i32 value, u64 size) {
     return ENGINE_SET(dest, value, size);
 }
 
@@ -264,11 +253,11 @@ MemoryStats memory_get_stats(void) {
     return memoryStats;
 }
 
-ENGINE_API void *memory_allocate_temporary(u64 size) {
+void *memory_allocate_temporary(u64 size) {
     return allocate_from_pool(&tempPool, size, MEMORY_TAG_UNKNOWN);
 }
 
-ENGINE_API void memory_reset_temporary(void) {
+void memory_reset_temporary(void) {
     // TODO: Move to platform system
 #if defined(PLATFORM_WINDOWS)
     EnterCriticalSection(&tempPool.lock);

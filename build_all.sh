@@ -47,14 +47,14 @@ if [ $? -ne 0 ]; then
 fi
 
 # Game logic library
-# make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=game-lib OUTPUT=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine"
+# make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=game-lib OUTPUT=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine"
 # if [ $? -ne 0 ]; then
 #     echo "Error: $?"
 #     exit $?
 # fi
 
 # Editor logic library
-make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine"
+make -j -f Makefile.lib.mak $ACTION TARGET=$TARGET ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
@@ -65,14 +65,14 @@ fi
 # --------------------------------------------------------------------------
 
 # Editor
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine -leditor"
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine -leditor"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
 # Game
-# make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/lib -lengine -lgame"
+# make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine -lgame"
 # if [ $? -ne 0 ]; then
 #     echo "Error: $?"
 #     exit $?

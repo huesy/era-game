@@ -22,24 +22,24 @@ typedef struct EditorState {
  *
  * @return b8 True if the editor was initialized successfully, otherwise false.
  */
-ENGINE_API b8 editor_init(void);
+b8 editor_init(void);
 
 /**
  * @brief Shuts down the editor and cleans up resources.
  */
-ENGINE_API void editor_shutdown(void);
+void editor_shutdown(void);
 
 /**
  * @brief Updates the editor.
  *
  * @param deltaTime
  */
-ENGINE_API void editor_update(f32 deltaTime);
+void editor_update(f32 deltaTime);
 
 /**
  * @brief Renders the editor.
  */
-ENGINE_API void editor_render(void);
+void editor_render(void);
 
 // Add other editor-specific functions here.
 // For example:

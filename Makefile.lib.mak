@@ -65,7 +65,7 @@ _DEFINES += -DENGINE_EXPORT
 # Directories
 SRCDIR = src/$(ASSEMBLY)
 BUILDDIR = build/$(PLATFORM)
-LIBDIR = $(BUILDDIR)/lib
+BINDIR = $(BUILDDIR)/bin
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
 
 # Find all C source files and generate corresponding object files and dependencies
@@ -81,7 +81,7 @@ ifeq ($(OS),Windows_NT)
     PREFIX := 
     SHELL := cmd.exe
         
-    _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+    _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
     _CFLAGS +=
     _LDFLAGS += -L$(OBJDIR) -shared
@@ -98,7 +98,7 @@ else
         EXTENSION := so
         PREFIX := lib
 
-        _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+        _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared
@@ -114,7 +114,7 @@ else
         EXTENSION := dylib
         PREFIX := lib
 
-        _DYNAMIC_LIB := $(LIBDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+        _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib
@@ -132,7 +132,7 @@ all: scaffold compile link
 
 .PHONY: scaffold
 scaffold:
-	@$(call MKDIR,$(LIBDIR))
+	@$(call MKDIR,$(BINDIR))
 	@$(call MKDIR,$(OBJDIR))
 
 .PHONY: link
@@ -151,7 +151,7 @@ clean:
 	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
 	@$(call DEL,$(_DYNAMIC_LIB))
 ifeq ($(PLATFORM),windows)
-	@$(call DEL,$(LIBDIR)/$(PREFIX)$(OUTPUT).*)
+	@$(call DEL,$(BINDIR)/$(PREFIX)$(OUTPUT).*)
 endif
 	@$(call RM,$(OBJDIR))
 
