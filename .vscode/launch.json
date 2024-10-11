@@ -6,11 +6,12 @@
       "type": "cppdbg",
       "request": "launch",
       "stopAtEntry": false,
-      "environment": [],
+      "environment": [
+      ],
       "osx": {
         "MIMode": "lldb",
         "targetArchitecture": "arm64",
-        "cwd": "${workspaceFolder}/build/macos/bin",
+        "cwd": "${workspaceFolder}/build/macos/bin/",
         "program": "${workspaceFolder}/build/macos/bin/editor",
         "externalConsole": false,
       },

@@ -50,7 +50,7 @@
 #        define ENGINE_API __declspec(dllimport)
 #    endif
 #elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
-#    ifdef ENGINE_EXPORTS
+#    ifdef ENGINE_EXPORT
 #        define ENGINE_API __attribute__((visibility("default")))
 #    else
 #        define ENGINE_API

@@ -68,9 +68,7 @@ BUILDDIR = build/$(PLATFORM)
 BINDIR = $(BUILDDIR)/bin
 OBJDIR = $(BUILDDIR)/obj/$(ASSEMBLY)
 
-# Find all C source files and generate corresponding object files and dependencies
-SRCFILES = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
-OBJFILES = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRCFILES))
+# Logging
 LOGFILE = $(BUILDDIR)/build_log.txt
 
 # Detect platform
@@ -90,6 +88,10 @@ ifeq ($(OS),Windows_NT)
     RM = if exist "$(subst /,\,$(1))" rmdir /S /Q "$(subst /,\,$(1))"
     DEL = if exist "$(subst /,\,$(1))" del "$(subst /,\,$(1))"
     ECHO = echo
+
+    # Find all C source files and generate corresponding object files and dependencies
+    SRCFILES = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
+    OBJFILES = $(patsubst
 else
     OS := $(shell uname -s)
     ifeq ($(OS),Linux)
@@ -107,6 +109,10 @@ else
         RM = rm -rf "$(1)"
         DEL = rm -f "$(1)"
         ECHO = echo
+
+        # Find all C source files and generate corresponding object files and dependencies
+        SRCFILES = $(shell find $(SRCDIR) -type f -name '*.c')
+        OBJFILES = $(patsubst $(SRCDIR)/%,$(OBJDIR)/%.o,$(SRCFILES))
     endif
     ifeq ($(OS),Darwin)
         # MacOS
@@ -116,13 +122,17 @@ else
 
         _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
-        _CFLAGS += -fPIC
-        _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib
+        _CFLAGS += -fPIC -ObjC
+        _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib -install_name @rpath/$(PREFIX)$(OUTPUT).$(EXTENSION) -lobjc -framework Cocoa
 
         MKDIR = mkdir -p "$(1)"
         RM = rm -rf "$(1)"
         DEL = rm -rf "$(1)"
         ECHO = echo
+
+        # Find all C source files and generate corresponding object files and dependencies
+        SRCFILES = $(shell find $(SRCDIR) -type f \( -name '*.c' -or -name '*.m' \))
+        OBJFILES = $(patsubst $(SRCDIR)/%,$(OBJDIR)/%.o,$(SRCFILES))
     endif
 endif
 
@@ -156,18 +166,18 @@ endif
 	@$(call RM,$(OBJDIR))
 
 # Create object files from source files and generate dependencies
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR)/%.c.o: $(SRCDIR)/%.c
 	@$(ECHO) Compiling '$<'...
 	@$(call MKDIR,$(dir $@))
 	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
 
 # Compile .m to .o objects only for macos
-# ifeq ($(PLATFORM),macos)
-# $(OBJDIR)/%.o: $(SRCDIR)/%.m
-# 	@$(ECHO) Compiling '$<'...
-# 	@$(call MKDIR,$(dir $@))
-# 	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
-# endif
+ifeq ($(PLATFORM),macos)
+$(OBJDIR)/%.m.o: $(SRCDIR)/%.m
+	@$(ECHO) Compiling '$<'...
+	@$(call MKDIR,$(dir $@))
+	@$(CC) $< $(_CFLAGS) -c -o $@ $(_DEFINES) $(_INCLUDES)
+endif
 
 # Generate dependencies
 -include $(OBJFILES:.o=.d)
