@@ -1,9 +1,11 @@
 #include "editor/editor.h"
+#include "engine/logging.h"
 #include "engine/platform.h"
 #include <stdio.h>
+#include <time.h>
 
 ENGINE_API b8 editor_init(void) {
-    printf("Editor initialized.\n");
+    log_info("Editor initialized.");
 
     WindowConfig windowConfig = {0};
     windowConfig.width = 1280;
@@ -17,19 +19,27 @@ ENGINE_API b8 editor_init(void) {
         return false;
     }
 
-    platform_create_window(&windowConfig);
+    void *window = platform_create_window(&windowConfig);
+    if (!window) {
+        log_error("Failed to create window.");
+        platform_shutdown();
+        return false;
+    }
 
     return true;
 }
 
 ENGINE_API void editor_shutdown(void) {
-    printf("Editor shutdown.\n");
+    log_info("Editor shutdown.");
+    platform_shutdown();
 }
 
 ENGINE_API void editor_update(f32 deltaTime) {
-    printf("Editor update: %f\n", deltaTime);
+    // TODO: Implement editor-specific logic.
+    log_debug("Editor update: %.3f seconds elapsed.", deltaTime);
 }
 
 ENGINE_API void editor_render(void) {
-    printf("Editor render.\n");
+    // TODO: Implement editor-specific rendering logic.
+    log_debug("Editor render.");
 }
