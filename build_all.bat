@@ -46,7 +46,7 @@ ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 @REM --------------------------------------------------------------------------
 
 REM Engine core library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="%ENGINE_LINK%"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="%ENGINE_LINK% -lgdi32"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game library

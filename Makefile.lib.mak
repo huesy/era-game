@@ -91,7 +91,7 @@ ifeq ($(OS),Windows_NT)
 
     # Find all C source files and generate corresponding object files and dependencies
     SRCFILES = $(wildcard $(SRCDIR)/**/*.c) $(wildcard $(SRCDIR)/*.c)
-    OBJFILES = $(patsubst
+    OBJFILES = $(patsubst $(SRCDIR)/%,$(OBJDIR)/%.o,$(SRCFILES))
 else
     OS := $(shell uname -s)
     ifeq ($(OS),Linux)

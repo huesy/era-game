@@ -29,7 +29,7 @@ ENGINE_API void platform_shutdown(void) {
 }
 
 ENGINE_API void platform_poll_events(void) {
-    // TODO: Windows-specific event polling (e.g., PeekMessage or GetMEssage loop).
+    // TODO: Windows-specific event polling (e.g., PeekMessage or GetMessage loop).
     MSG msg;
     while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
         if (msg.message == WM_QUIT) {
@@ -60,16 +60,32 @@ LRESULT CALLBACK WindowProc(
         case WM_SIZE: {
             OutputDebugStringA("WM_SIZE\n");
         } break;
+
         case WM_CLOSE: {
             OutputDebugStringA("WM_CLOSE\n");
         } break;
+
         case WM_DESTROY: {
             OutputDebugStringA("WM_DESTROY\n");
-            PostQuitMessage(0);
         } break;
+
         case WM_ACTIVATEAPP: {
             OutputDebugStringA("WM_ACTIVATEAPP\n");
         } break;
+
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC deviceContext = BeginPaint(hwnd, &ps);
+            i32 x = ps.rcPaint.left;
+            i32 y = ps.rcPaint.top;
+            i32 width = ps.rcPaint.right - ps.rcPaint.left;
+            i32 height = ps.rcPaint.bottom - ps.rcPaint.top;
+            PatBlt(deviceContext, x, y, width, height, BLACKNESS);
+            EndPaint(hwnd, &ps);
+
+            ENGINE_UNUSED(deviceContext);
+        } break;
+
         default: {
             result = DefWindowProc(hwnd, msg, wParam, lParam);
         } break;
@@ -94,9 +110,31 @@ ENGINE_API void *platform_create_window(WindowConfig *config) {
     // windowClass.hIcon;
     windowClass.lpszClassName = "EngineWindowClass";
 
-    ENGINE_UNUSED(windowClass);
+    if (RegisterClass(&windowClass) == 0) {
+        log_error("Failed to register window class.");
+        return NULL;
+    }
 
-    return NULL;
+    HWND windowHandle = CreateWindowEx(
+        0,
+        windowClass.lpszClassName,
+        config->title,
+        WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+        CW_USEDEFAULT,
+        CW_USEDEFAULT,
+        config->width,
+        config->height,
+        NULL,
+        NULL,
+        GetModuleHandle(NULL),
+        NULL);
+
+    if (windowHandle == NULL) {
+        log_error("Failed to create window.");
+        return NULL;
+    }
+
+    return (void *)windowHandle;
 }
 
 ENGINE_API void platform_destroy_window(void *window);

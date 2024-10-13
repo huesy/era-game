@@ -35,11 +35,12 @@ ENGINE_API void editor_shutdown(void) {
 }
 
 ENGINE_API void editor_update(f32 deltaTime) {
+    ENGINE_UNUSED(deltaTime);
     // TODO: Implement editor-specific logic.
-    log_debug("Editor update: %.3f seconds elapsed.", deltaTime);
+    // log_debug("Editor update: %.3f seconds elapsed.", deltaTime);
 }
 
 ENGINE_API void editor_render(void) {
     // TODO: Implement editor-specific rendering logic.
-    log_debug("Editor render.");
+    // log_debug("Editor render.");
 }

@@ -48,7 +48,7 @@ typedef enum {
  * @param format The format string for the message.
  * @param ... Any formatted data to be included in the message.
  */
-void log_message(LogLevel level, const char *format, ...);
+ENGINE_API void log_message(LogLevel level, const char *format, ...);
 
 #if LOG_FATAL_ENABLED == 1
 /**
