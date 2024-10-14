@@ -94,10 +94,10 @@ LRESULT CALLBACK WindowProc(
     return result;
 }
 
-ENGINE_API void *platform_create_window(WindowConfig *config) {
+ENGINE_API EngineResult platform_create_window(WindowConfig *config, Window *window) {
     if (!config) {
         log_error("Invalid window configuration.");
-        return NULL;
+        return ENGINE_FAILURE;
     }
 
     log_info("Creating window: %dx%d - %s", config->width, config->height, config->title);
@@ -112,7 +112,7 @@ ENGINE_API void *platform_create_window(WindowConfig *config) {
 
     if (RegisterClass(&windowClass) == 0) {
         log_error("Failed to register window class.");
-        return NULL;
+        return ENGINE_FAILURE;
     }
 
     HWND windowHandle = CreateWindowEx(
@@ -131,13 +131,15 @@ ENGINE_API void *platform_create_window(WindowConfig *config) {
 
     if (windowHandle == NULL) {
         log_error("Failed to create window.");
-        return NULL;
+        return ENGINE_FAILURE;
     }
 
-    return (void *)windowHandle;
+    window->handle = windowHandle;
+
+    return ENGINE_SUCCESS;
 }
 
-ENGINE_API void platform_destroy_window(void *window);
+ENGINE_API void platform_destroy_window(Window *window);
 ENGINE_API u32 platform_get_window_width(void *window);
 ENGINE_API u32 platform_get_window_height(void *window);
 ENGINE_API void platform_set_window_title(void *window, const char *title);

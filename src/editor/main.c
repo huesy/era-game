@@ -1,13 +1,44 @@
 #include "editor/editor.h"
 #include "engine/logging.h"
+#include "engine/memory.h"
 #include "engine/platform.h"
 #include <stdio.h>
 #include <time.h>
 
+typedef struct AppState {
+    b8 isRunning;
+    Window *windows;
+} AppState;
+
+static AppState state = {0};
+
 int main(void) {
     log_info("Starting editor...");
 
-    if (!editor_init()) {
+    // Stand up the platform/window.
+    WindowConfig windowConfig = {0};
+    windowConfig.width = 1280;
+    windowConfig.height = 720;
+    windowConfig.title = "Editor";
+
+    PlatformConfig platformConfig = {0};
+    platformConfig.window = windowConfig;
+
+    if (platform_init(&platformConfig) != ENGINE_SUCCESS) {
+        return 1;
+    }
+
+    state.isRunning = true;
+    state.windows = memory_allocate(sizeof(Window) * 1, MEMORY_TAG_EDITOR); // Allocate memory for one window.
+
+    if (!state.windows) {
+        log_error("Failed to allocate memory for windows.");
+        platform_shutdown();
+        return 1;
+    }
+
+    // TODO: Pass rendering context to the editor lib.
+    if (editor_init() != ENGINE_SUCCESS) {
         log_error("Editor initialization failed.");
         return -1;
     }

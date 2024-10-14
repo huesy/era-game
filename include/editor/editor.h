@@ -13,16 +13,12 @@
 
 #include "engine/defines.h"
 
-typedef struct EditorState {
-    b8 isRunning;
-} EditorState;
-
 /**
  * @brief Initializes the editor.
  *
- * @return b8 True if the editor was initialized successfully, otherwise false.
+ * @return EngineResult ENGINE_SUCCESS if the editor was initialized successfully, otherwise an error code.
  */
-ENGINE_API b8 editor_init(void);
+ENGINE_API EngineResult editor_init(void);
 
 /**
  * @brief Shuts down the editor and cleans up resources.
