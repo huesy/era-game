@@ -40,6 +40,19 @@ typedef struct PlatformConfig {
     WindowConfig window; /**< Configuration for the window to create. */
 } PlatformConfig;
 
+typedef struct Window {
+    /** @brief The title of the window.  */
+    const char *title;
+
+    /** @brief The width of the window. */
+    u16 width;
+    /** @brief The height of the window. */
+    u16 height;
+
+    /** @brief The handle to the window. */
+    void *handle;
+} Window;
+
 /**
  * @brief Initialises the platform, including creating a window if needed.
  *
@@ -79,16 +92,17 @@ ENGINE_API f32 platform_get_absolute_time(void);
  * @brief Creates a window with the specified configuration.
  *
  * @param config Pointer to the platform configuration structure.
- * @return void* A handle to the created window, or NULL if an error occurred.
+ * @param window Pointer to the window to create.
+ * @return ENGINE_SUCCESS if the window was created successfully, otherwise an error code.
  */
-ENGINE_API void *platform_create_window(WindowConfig *config);
+ENGINE_API EngineResult platform_create_window(WindowConfig *config, Window *window);
 
 /**
  * @brief Destroys the window.
  *
  * @param window Pointer to the window to destroy.
  */
-ENGINE_API void platform_destroy_window(void *window);
+ENGINE_API void platform_destroy_window(Window *window);
 
 /**
  * @brief Retrieves the width of the window.

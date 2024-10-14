@@ -15,19 +15,36 @@ typedef struct PlatformState {
 
 static PlatformState state = {0};
 
-@interface EngineAppDelegate : NSObject <NSApplicationDelegate>
+@interface WindowDelegate : NSObject <NSWindowDelegate>
+@public 
+@property (strong, nonatomic) NSWindow *window;
 @end
 
-@implementation EngineAppDelegate
+@implementation WindowDelegate
+
+// Called when the application has finished launching.
 - (void)applicationDidFinishLaunching:(NSNotification *)notification {
     log_info("Application did finish launching.");
     state.isRunning = true;
 }
 
-- (BOOL)applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)sender {
+// Delegate method called when the window is about to close.
+- (BOOL)windowShouldClose:(NSWindow *)sender {
+    // Terminate the application when the window is closed.
+    [NSApp terminate:nil];
+
     state.isRunning = false;
+
     return YES;
 }
+
+// Delegate method called when the window is resized.
+- (void)windowDidResize:(NSNotification *)notification {
+    NSWindow *window = [notification object];
+    NSSize newSize = [window frame].size;
+    log_info("Window resized: %dx%d", (u32)newSize.width, (u32)newSize.height);
+}
+
 @end
 
 ENGINE_API EngineResult platform_init(PlatformConfig *config) {
@@ -79,7 +96,12 @@ ENGINE_API f32 platform_get_absolute_time(void) {
 // =============================================================================
 // Windowing
 
-ENGINE_API void *platform_create_window(WindowConfig *config) {
+ENGINE_API void *platform_create_window(WindowConfig *config, Window *window) {
+    if (!window) {
+        log_error("Invalid window handle.");
+        return NULL;
+    }
+
     if (!config) {
         log_error("Invalid window configuration.");
         return NULL;
