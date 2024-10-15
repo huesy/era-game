@@ -31,7 +31,9 @@ ENGINE_API void *memory_allocate_aligned(u64 size, u16 alignment, MemoryTag tag)
     return block;
 }
 
-ENGINE_API void memory_free(void *block) {
+ENGINE_API void memory_free(void *block, MemoryTag tag) {
+    ENGINE_UNUSED(tag);
+
     platform_memory_free(block);
 }
 

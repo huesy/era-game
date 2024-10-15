@@ -19,7 +19,6 @@ ENGINE_API EngineResult editor_init(void) {
 
 ENGINE_API void editor_shutdown(void) {
     log_info("Editor shutdown.");
-    platform_shutdown();
 }
 
 ENGINE_API void editor_update(f32 deltaTime) {

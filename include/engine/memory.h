@@ -28,7 +28,7 @@ typedef enum MemoryTag {
 
 ENGINE_API void *memory_allocate(u64 size, MemoryTag tag);
 ENGINE_API void *memory_allocate_aligned(u64 size, u16 alignment, MemoryTag tag);
-ENGINE_API void memory_free(void *block);
+ENGINE_API void memory_free(void *block, MemoryTag tag);
 ENGINE_API void *memory_copy(void *dest, const void *src, u64 size);
 ENGINE_API void *memory_set(void *dest, i32 value, u64 size);
 ENGINE_API void *memory_zero(void *block, u64 size);

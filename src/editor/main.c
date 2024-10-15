@@ -43,6 +43,16 @@ int main(void) {
         return -1;
     }
 
+    if (platform_create_window(&windowConfig, &state.windows[0]) != ENGINE_SUCCESS) {
+        log_error("Failed to create window.");
+        editor_shutdown();
+
+        memory_free(state.windows, MEMORY_TAG_EDITOR);
+
+        platform_shutdown();
+        return 1;
+    }
+
     f32 previousTime = platform_get_absolute_time();
     f32 deltaTime = 0.0f;
 
@@ -64,6 +74,8 @@ int main(void) {
     }
 
     editor_shutdown();
+    memory_free(state.windows, MEMORY_TAG_EDITOR);
+    platform_shutdown();
 
     log_info("Editor finished.");
     return 0;
