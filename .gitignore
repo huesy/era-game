@@ -1,3 +1,6 @@
+# Ignore vendor directory
+vendor/
+
 # Ignore build artifacts
 build/
 *.o
@@ -19,9 +22,9 @@ Thumbs.db
 *.config
 
 # Ignore compiled libraries
-*.a
-*.so
-*.dll
+# *.a
+# *.so
+# *.dll
 
 # Ignore temporary files
 *.tmp

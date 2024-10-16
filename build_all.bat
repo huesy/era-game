@@ -42,6 +42,14 @@ if "%PLATFORM%" == "windows" (
 ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 
 @REM --------------------------------------------------------------------------
+@REM Copy libraries
+@REM --------------------------------------------------------------------------
+IF NOT EXIST build\%PLATFORM_DIR%\bin (mkdir build\%PLATFORM_DIR%\bin)
+copy /Y libs\%PLATFORM_DIR%\*.dll build\%PLATFORM_DIR%\bin
+copy /Y libs\%PLATFORM_DIR%\*.lib build\%PLATFORM_DIR%\bin
+
+
+@REM --------------------------------------------------------------------------
 @REM Libraries
 @REM --------------------------------------------------------------------------
 
