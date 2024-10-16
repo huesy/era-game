@@ -10,7 +10,7 @@ typedef struct AppState {
     Window *windows;
 } AppState;
 
-static AppState state = {0};
+global AppState state = {0};
 
 int main(void) {
     log_info("Starting editor...");

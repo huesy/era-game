@@ -6,6 +6,10 @@
 
 typedef struct PlatformState {
     b8 isRunning;
+    BITMAPINFO bitmapInfo;
+    void *bitmapMemory;
+    HBITMAP bitmapHandle;
+    HDC bitmapDeviceContext;
 } PlatformState;
 
 static PlatformState state = {0};
@@ -48,8 +52,53 @@ ENGINE_API b8 platform_is_running(void) {
 // =============================================================================
 // Windowing
 
-LRESULT CALLBACK WindowProc(
-    HWND hwnd,
+/**
+ * @brief Resizes the DIB (Device Independent Bitmap) section of the window.
+ *
+ * @param width The new width of the DIB section.
+ * @param height The new height of the DIB section.
+ */
+internal void platform_resize_dib_section(i32 width, i32 height) {
+
+    // TODO: Bulletproof this.
+    // Maybe don't free first, free after, then free first is that fails.
+
+    if (state.bitmapHandle) {
+        // Free the existing bitmap handle.
+        DeleteObject(state.bitmapHandle);
+    }
+
+    if (!state.bitmapDeviceContext) {
+        // TODO: Should we recreate these under certain special circumstances?
+        state.bitmapDeviceContext = CreateCompatibleDC(0);
+    }
+
+    state.bitmapInfo.bmiHeader.biSize = sizeof(state.bitmapInfo.bmiHeader);
+    state.bitmapInfo.bmiHeader.biWidth = width;
+    state.bitmapInfo.bmiHeader.biHeight = height;
+    state.bitmapInfo.bmiHeader.biPlanes = 1;
+    state.bitmapInfo.bmiHeader.biBitCount = 32;
+    state.bitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+    state.bitmapHandle = CreateDIBSection(
+        state.bitmapDeviceContext,
+        &state.bitmapInfo,
+        DIB_RGB_COLORS,
+        &state.bitmapMemory,
+        0, 0);
+}
+
+internal void platform_update_window(HDC deviceContext, i32 x, i32 y, i32 width, i32 height) {
+    StretchDIBits(deviceContext,
+                  x, y, width, height,
+                  x, y, width, height,
+                  state.bitmapMemory,
+                  &state.bitmapInfo,
+                  DIB_RGB_COLORS, SRCCOPY);
+}
+
+LRESULT CALLBACK platform_window_proc(
+    HWND window,
     UINT msg,
     WPARAM wParam,
     LPARAM lParam) {
@@ -58,15 +107,20 @@ LRESULT CALLBACK WindowProc(
 
     switch (msg) {
         case WM_SIZE: {
+            RECT clientRect;
+            GetClientRect(window, &clientRect);
+            u32 width = clientRect.right - clientRect.left;
+            u32 height = clientRect.bottom - clientRect.top;
+            platform_resize_dib_section(width, height);
             OutputDebugStringA("WM_SIZE\n");
         } break;
 
         case WM_CLOSE: {
-            OutputDebugStringA("WM_CLOSE\n");
+            state.isRunning = false;
         } break;
 
         case WM_DESTROY: {
-            OutputDebugStringA("WM_DESTROY\n");
+            state.isRunning = false;
         } break;
 
         case WM_ACTIVATEAPP: {
@@ -75,19 +129,19 @@ LRESULT CALLBACK WindowProc(
 
         case WM_PAINT: {
             PAINTSTRUCT ps;
-            HDC deviceContext = BeginPaint(hwnd, &ps);
+            HDC deviceContext = BeginPaint(window, &ps);
             i32 x = ps.rcPaint.left;
             i32 y = ps.rcPaint.top;
             i32 width = ps.rcPaint.right - ps.rcPaint.left;
             i32 height = ps.rcPaint.bottom - ps.rcPaint.top;
-            PatBlt(deviceContext, x, y, width, height, BLACKNESS);
-            EndPaint(hwnd, &ps);
+            platform_update_window(deviceContext, x, y, width, height);
+            EndPaint(window, &ps);
 
             ENGINE_UNUSED(deviceContext);
         } break;
 
         default: {
-            result = DefWindowProc(hwnd, msg, wParam, lParam);
+            result = DefWindowProc(window, msg, wParam, lParam);
         } break;
     }
 
@@ -105,7 +159,7 @@ ENGINE_API EngineResult platform_create_window(WindowConfig *config, Window *win
     WNDCLASS windowClass = {0};
     // TODO(Andrew): Check if HREDRAW and VREDRAW are needed.
     windowClass.style = CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-    windowClass.lpfnWndProc = WindowProc;
+    windowClass.lpfnWndProc = platform_window_proc;
     windowClass.hInstance = GetModuleHandle(NULL);
     // windowClass.hIcon;
     windowClass.lpszClassName = "EngineWindowClass";

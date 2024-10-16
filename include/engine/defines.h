@@ -60,6 +60,9 @@
 #endif
 
 // Standard macros
+#define global static   // Global variable.
+#define internal static // Internal function.
+
 #define ENGINE_UNUSED(x) (void)(x)                               // To avoid unused parameter warnings.
 #define ENGINE_ARRAY_COUNT(arr) (sizeof(arr) / sizeof((arr)[0])) // Get array element count.
 #define ENGINE_ALIGN(x) __attribute__((aligned(x)))              // Align data to x bytes.
