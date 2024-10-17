@@ -1,123 +1,39 @@
 #include "editor/editor.h"
-#include "engine/logging.h"
-#include "engine/memory.h"
-#include "engine/platform.h"
 #include <engine/engine.h>
 #include <stdio.h>
 #include <time.h>
 
-typedef struct AppState {
-    b8 isRunning;
-    Window *windows;
-} AppState;
-
-ENGINE_GLOBAL AppState state = {0};
-
 int main(void) {
 
-    WindowConfig windowConfig = {0};
-    windowConfig.width = 1280;
-    windowConfig.height = 720;
-    windowConfig.title = "Editor";
+    log_info("Starting editor...");
 
-    Application app = {0};
-    app.window = &windowConfig;
+    // Define engine configuration
+    EngineConfig engineConfig = {0};
+    engineConfig.memoryPoolSize = 1024 * 1024 * 64; // 64MB
 
-    application_init(&app);
-    void create_application(Application * app) {
-        log_info("Starting editor...");
-
-        EngineConfig engineConfig = {0};
-
-        if (engine_init(&engineConfig) != ENGINE_SUCCESS) {
-            log_error("Failed to initialize engine.");
-            return 1;
-        }
-
-        // Stand up the platform/window.
-        WindowConfig windowConfig = {0};
-        windowConfig.width = 1280;
-        windowConfig.height = 720;
-        windowConfig.title = "Editor";
-
-        PlatformConfig platformConfig = {0};
-        platformConfig.window = windowConfig;
-
-        Platform platform = {0};
-
-        if (platform_init(&platformConfig, &platform) != ENGINE_SUCCESS) {
-            return;
-        }
-
-        state.isRunning = true;
-        state.windows = memory_allocate(sizeof(Window) * 1, MEMORY_TAG_EDITOR); // Allocate memory for one window.
+    // Allocate and initialize the application.
+    Application *app = (Application *)memory_allocate(sizeof(Application), MEMORY_TAG_ENGINE);
+    if (!app) {
+        log_error("Failed to allocate memory for application.");
+        return -1;
     }
 
-    int main(void) {
-        log_info("Starting editor...");
-
-        // Stand up the platform/window.
-        WindowConfig windowConfig = {0};
-        windowConfig.width = 1280;
-        windowConfig.height = 720;
-        windowConfig.title = "Editor";
-
-        PlatformConfig platformConfig = {0};
-        platformConfig.window = windowConfig;
-
-        if (platform_init(&platformConfig) != ENGINE_SUCCESS) {
-            return 1;
-        }
-
-        state.isRunning = true;
-        state.windows = memory_allocate(sizeof(Window) * 1, MEMORY_TAG_EDITOR); // Allocate memory for one window.
-
-        if (!state.windows) {
-            log_error("Failed to allocate memory for windows.");
-            platform_shutdown();
-            return 1;
-        }
-
-        // TODO: Pass rendering context to the editor lib.
-        if (editor_init() != ENGINE_SUCCESS) {
-            log_error("Editor initialization failed.");
-            return -1;
-        }
-
-        if (platform_create_window(&windowConfig, &state.windows[0]) != ENGINE_SUCCESS) {
-            log_error("Failed to create window.");
-            editor_shutdown();
-
-            memory_free(state.windows, MEMORY_TAG_EDITOR);
-
-            platform_shutdown();
-            return 1;
-        }
-
-        f32 previousTime = platform_get_absolute_time();
-        f32 deltaTime = 0.0f;
-
-        // Main loop.
-        while (platform_is_running()) {
-            // Poll for platform-specific events.
-            platform_poll_events();
-
-            // Calculate deltaTime
-            f32 currentTime = platform_get_absolute_time();
-            deltaTime = currentTime - previousTime;
-            previousTime = currentTime;
-
-            // Update editor state.
-            editor_update(deltaTime);
-
-            // Render editor.
-            editor_render();
-        }
-
-        editor_shutdown();
-        memory_free(state.windows, MEMORY_TAG_EDITOR);
-        platform_shutdown();
-
-        log_info("Editor finished.");
-        return 0;
+    // Initialize the engine.
+    if (engine_init(&engineConfig, app) != ENGINE_SUCCESS) {
+        log_error("Failed to initialize engine.");
+        memory_free(app, MEMORY_TAG_ENGINE);
+        return -1;
     }
+
+    // Run the main loop.
+    engine_run(app);
+
+    // Shutdown the engine.
+    engine_shutdown(app);
+
+    // Free the application memory.
+    memory_free(app, MEMORY_TAG_ENGINE);
+
+    log_info("Editor finished.");
+    return 0;
+}

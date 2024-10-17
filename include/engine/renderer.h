@@ -6,7 +6,7 @@
 
 // Renderer configuration structure.
 typedef struct RendererConfig {
-
+    const char *name;
 } RendererConfig;
 
 // Renderer structure.

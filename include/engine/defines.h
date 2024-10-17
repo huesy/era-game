@@ -63,6 +63,15 @@
 #define ENGINE_GLOBAL static   // Global variable.
 #define ENGINE_INTERNAL static // Internal function.
 
+// Mutex macros
+#if defined(PLATFORM_WINDOWS)
+#    include <Windows.h>
+#    define ENGINE_MUTEX CRITICAL_SECTION
+#elif defined(PLATFORM_LINUX) || defined(PLATFORM_MACOS)
+#    include <pthread.h>
+#    define ENGINE_MUTEX pthread_mutex_t
+#endif
+
 #define ENGINE_UNUSED(x) (void)(x)                               // To avoid unused parameter warnings.
 #define ENGINE_ARRAY_COUNT(arr) (sizeof(arr) / sizeof((arr)[0])) // Get array element count.
 #define ENGINE_ALIGN(x) __attribute__((aligned(x)))              // Align data to x bytes.

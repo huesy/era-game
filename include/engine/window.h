@@ -7,6 +7,8 @@
 // Window configuration structure.
 typedef struct WindowConfig {
     const char *title; /**< The title of the window to create. */
+    i32 x;             /**< The x position of the window to create. */
+    i32 y;             /**< The y position of the window to create. */
     i32 width;         /**< The width of the window to create. */
     i32 height;        /**< The height of the window to create. */
     b8 fullScreen;     /**< True if the window should be created in full screen mode. */
