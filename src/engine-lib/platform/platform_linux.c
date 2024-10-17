@@ -1,6 +1,7 @@
 #include "engine/platform.h"
 
-#ifdef PLATFORM_LINUX
+// TODO: Forcing SDL3 platform for now.
+#ifdef __DISABLED__PLATFORM_LINUX
 #    include "engine/logging.h"
 #    include <dlfcn.h>
 #    include <pthread.h>

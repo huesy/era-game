@@ -14,19 +14,33 @@ typedef struct MemoryState {
 } MemoryState;
 
 ENGINE_API void *memory_allocate(u64 size, MemoryTag tag) {
-    return memory_allocate_aligned(size, 1, tag);
-}
-
-ENGINE_API void *memory_allocate_aligned(u64 size, u16 alignment, MemoryTag tag) {
 
     ENGINE_UNUSED(tag);
 
-    void *block = platform_memory_allocate(size, alignment);
+    void *block = platform_memory_allocate(size);
 
     if (!block) {
         log_error("Failed to allocate memory block of size %llu.", size);
         return NULL;
     }
+
+    // TODO: Track memory usage and statistics.
+
+    return block;
+}
+
+ENGINE_API void *memory_aligned_allocate(u64 size, u16 alignment, MemoryTag tag) {
+
+    ENGINE_UNUSED(tag);
+
+    void *block = platform_memory_aligned_allocate(size, alignment);
+
+    if (!block) {
+        log_error("Failed to allocate memory block of size %llu.", size);
+        return NULL;
+    }
+
+    // TODO: Track memory usage and statistics.
 
     return block;
 }

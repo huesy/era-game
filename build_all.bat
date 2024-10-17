@@ -44,9 +44,11 @@ ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 @REM --------------------------------------------------------------------------
 @REM Copy libraries
 @REM --------------------------------------------------------------------------
+IF NOT EXIST build (mkdir build)
+IF NOT EXIST build\%PLATFORM_DIR% (mkdir build\%PLATFORM_DIR%)
 IF NOT EXIST build\%PLATFORM_DIR%\bin (mkdir build\%PLATFORM_DIR%\bin)
-copy /Y libs\%PLATFORM_DIR%\*.dll build\%PLATFORM_DIR%\bin
-copy /Y libs\%PLATFORM_DIR%\*.lib build\%PLATFORM_DIR%\bin
+copy /Y libs\sdl3.dll build\%PLATFORM_DIR%\bin\
+copy /Y libs\sdl3.lib build\%PLATFORM_DIR%\bin\
 
 
 @REM --------------------------------------------------------------------------
@@ -54,7 +56,7 @@ copy /Y libs\%PLATFORM_DIR%\*.lib build\%PLATFORM_DIR%\bin
 @REM --------------------------------------------------------------------------
 
 REM Engine core library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="%ENGINE_LINK% -lgdi32"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin %ENGINE_LINK% -lgdi32 -lsdl3"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game library

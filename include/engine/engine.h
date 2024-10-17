@@ -12,6 +12,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include "application.h"
 #include "defines.h"
 
 typedef struct EngineConfig {

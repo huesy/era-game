@@ -1,6 +1,7 @@
 #include "engine/platform.h"
 
-#ifdef PLATFORM_MACOS
+// TODO: Forcing SDL3 platform for now.
+#ifdef __DISABLED__PLATFORM_MACOS
 #    include "engine/logging.h"
 #    include <Cocoa/Cocoa.h>
 #    include <dlfcn.h>

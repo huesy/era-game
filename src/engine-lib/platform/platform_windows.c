@@ -1,6 +1,7 @@
 #include "engine/platform.h"
 
-#ifdef PLATFORM_WINDOWS
+// TODO: Forcing SDL3 platform for now.
+#ifdef __DISABLED__PLATFORM_WINDOWS
 #    include "engine/logging.h"
 #    include <windows.h>
 

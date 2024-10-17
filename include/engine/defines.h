@@ -60,8 +60,8 @@
 #endif
 
 // Standard macros
-#define global static   // Global variable.
-#define internal static // Internal function.
+#define ENGINE_GLOBAL static   // Global variable.
+#define ENGINE_INTERNAL static // Internal function.
 
 #define ENGINE_UNUSED(x) (void)(x)                               // To avoid unused parameter warnings.
 #define ENGINE_ARRAY_COUNT(arr) (sizeof(arr) / sizeof((arr)[0])) // Get array element count.
