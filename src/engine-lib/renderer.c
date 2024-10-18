@@ -1,113 +1,53 @@
 #include "engine/renderer.h"
+#include "engine/logging.h"
+#include "engine/platform.h"
 
-ENGINE_API EngineResult
-renderer_create(RendererConfig *config, Renderer *renderer, Platform *platform) {
-    if (!config) {
-        log_error("Invalid renderer configuration.");
-        return ENGINE_FAILURE;
+ENGINE_API EngineResult renderer_init(MemoryPool *pool, const RendererConfig *config, Renderer *renderer, Platform *platform) {
+    if (!pool || !config || !renderer || !platform) {
+        log_error("Invalid MemoryPool, RendererConfig, Renderer, or Platform provided to renderer_init.");
+        return ENGINE_ERROR_INVALID_ARGUMENT;
     }
 
-    if (!renderer) {
-        log_error("Invalid renderer.");
-        return ENGINE_FAILURE;
-    }
+    // Assign configuration.
+    renderer->config = *config;
 
-    if (!platform) {
-        log_error("Invalid platform.");
-        return ENGINE_FAILURE;
-    }
+    // TODO:
+    // Initialize renderer-specific resources via platform abstraction.
+    // Currently, no additional initialization is required as platform handles
+    // renderer creation.
 
-    if (!platform->createRenderer) {
-        log_error("Platform does not support renderer creation.");
-        return ENGINE_FAILURE;
-    }
-
-    PlatformRendererConfig platformConfig = {0};
-
-    if (platform->createRenderer(&platformConfig, renderer->platformRenderer) != ENGINE_SUCCESS) {
-        log_error("Failed to create renderer.");
-        return ENGINE_FAILURE;
-    }
-
+    log_info("Renderer initialized: %s", renderer->config.name);
     return ENGINE_SUCCESS;
 }
 
-ENGINE_API void
-renderer_destroy(Renderer *renderer, Platform *platform) {
-    if (!renderer) {
-        log_error("Invalid renderer.");
+ENGINE_API void renderer_shutdown(Renderer *renderer, Platform *platform) {
+    if (!renderer || !platform) {
+        log_error("Invalid Renderer or Platform provided to renderer_shutdown.");
         return;
     }
 
-    if (!platform) {
-        log_error("Invalid platform.");
-        return;
-    }
+    // Delegate shutdown to platform abstraction if needed.
+    // Currently, platform handles renderer descruction.
 
-    if (!platform->destroyRenderer) {
-        log_error("Platform does not support renderer destruction.");
-        return;
-    }
-
-    platform->destroyRenderer(renderer->platformRenderer);
+    log_info("Renderer shutdown: %s", renderer->config.name);
 }
 
-ENGINE_API void
-renderer_present(Renderer *renderer, Platform *platform) {
-    if (!renderer) {
-        log_error("Invalid renderer.");
+ENGINE_API void renderer_clear(Renderer *renderer, Platform *platform) {
+    if (!renderer || !platform) {
+        log_error("Invalid Renderer or Platform provided to renderer_clear.");
         return;
     }
 
-    if (!platform) {
-        log_error("Invalid platform.");
-        return;
-    }
-
-    if (!platform->renderPresent) {
-        log_error("Platform does not support renderer presentation.");
-        return;
-    }
-
-    platform->renderPresent(renderer->platformRenderer);
+    // Delegate clearing to platform abstraction.
+    platform_renderer_clear(platform);
 }
 
-ENGINE_API void
-renderer_set_draw_color(Renderer *renderer, u8 r, u8 g, u8 b, u8 a) {
-    if (!renderer) {
-        log_error("Invalid renderer.");
+ENGINE_API void renderer_present(Renderer *renderer, Platform *platform) {
+    if (!renderer || !platform) {
+        log_error("Invalid Renderer or Platform provided to renderer_present.");
         return;
     }
 
-    if (!renderer->platformRenderer) {
-        log_error("Invalid platform renderer.");
-        return;
-    }
-
-    if (!renderer->platformRenderer->setDrawColor) {
-        log_error("Platform renderer does not support setting the draw color.");
-        return;
-    }
-
-    renderer->platformRenderer->setDrawColor(renderer->platformRenderer, r, g, b, a);
-}
-
-ENGINE_API void
-renderer_clear(Renderer *renderer, Platform *platform) {
-    if (!renderer) {
-        log_error("Invalid renderer.");
-        return;
-    }
-
-    if (!platform) {
-        log_error("Invalid platform.");
-        return;
-    }
-
-    if (!platform->renderClear) {
-        log_error("Platform does not support renderer clearing.");
-        return;
-    }
-
-    platform->renderClear(renderer->platformRenderer);
+    // Delegate presenting to platform abstraction.
+    platform_renderer_present(platform);
 }

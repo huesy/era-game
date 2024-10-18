@@ -1,173 +1,265 @@
 #include "engine/logging.h"
+#include "engine/memory.h"
 #include "engine/platform.h"
 #include <SDL3/SDL.h>
 
-// Platform-specific window structure.
-struct PlatformWindow {
-    SDL_Window *handle; /*< The SDL window handle. */
-};
-
-// Platform-specific renderer structure.
-struct PlatformRenderer {
-    SDL_Renderer *handle; /*< The SDL renderer handle. */
-};
+// Platform-specific data structure.
+typedef struct SDL3_PlatformData {
+    SDL_Window *window;     /**< The SDL window handle. */
+    SDL_Renderer *renderer; /**< The SDL renderer handle. */
+    b8 isRunning;           /**< True if the platform is running. */
+    u64 absoluteTime;       /**< The absolute time of the platform. */
+} SDL3_PlatformData;
 
 // =============================================================================
-#pragma region Platform
+#pragma region SDL3
 
-ENGINE_API EngineResult platform_init(void) {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO) != 0) {
-        log_error("SDL initialization failed: %s", SDL_GetError());
+/**
+ * @brief Initializes the SDL3 platform.
+ *
+ * @param platform A pointer to the Platform structure.
+ * @param pool A pointer to the memory pool structure.
+ * @return ENGINE_SUCCESS if the platform was initialized successfully, otherwise an error code.
+ */
+static EngineResult sdl3_platform_init(Platform *platform, MemoryPool *pool) {
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO)) {
+        log_error("SDL_Init Error: %s", SDL_GetError());
         return ENGINE_FAILURE;
     }
 
-    log_info("SDL Initialized.");
-    return ENGINE_SUCCESS;
-}
-
-ENGINE_API void platform_shutdown(void) {
-    SDL_Quit();
-    log_info("SDL Shutdown.");
-}
-
-// =============================================================================
-#pragma region Window
-
-ENGINE_API EngineResult platform_window_create(const PlatformWindowConfig *config, PlatformWindow **window) {
-    if (!config || !window) {
-        log_error("Invalid arguments to platform_window_create.");
-        return ENGINE_ERROR_INVALID_ARGUMENT;
+    // Allocate platform-specific data.
+    SDL3_PlatformData *data = (SDL3_PlatformData *)memory_allocate(pool, sizeof(SDL3_PlatformData), MEMORY_TAG_PLATFORM);
+    if (!data) {
+        log_error("Failed to allocate memory for SDL3_PlatformData.");
+        SDL_Quit();
+        return ENGINE_ERROR_ALLOCATION_FAILED;
     }
 
-    u32 flags;
-    if (config->fullScreen) {
+    SDL_WindowFlags flags = 0;
+
+    if (platform->window->config.fullScreen) {
         flags = SDL_WINDOW_FULLSCREEN;
     }
 
-    // Attempt to create the window.
-    SDL_Window *sdlWindow = SDL_CreateWindow(
-        config->title,
-        config->width,
-        config->height,
-        flags);
+    // Create SDL window.
+    data->window = SDL_CreateWindow(platform->window->config.title,
+                                    platform->window->config.width,
+                                    platform->window->config.height,
+                                    flags);
 
-    if (!sdlWindow) {
-        log_error("Failed to create window: %s", SDL_GetError());
+    if (!data->window) {
+        log_error("SDL_CreateWindow Error: %s", SDL_GetError());
+        memory_free(pool, data, MEMORY_TAG_PLATFORM);
+        SDL_Quit();
         return ENGINE_FAILURE;
     }
 
-    // Set the window position if an X or Y is non-zero.
-    if (config->x != 0 || config->y != 0) {
-        SDL_SetWindowPosition(sdlWindow, config->x, config->y);
+    // Create SDL renderer.
+    data->renderer = SDL_CreateRenderer(data->window, NULL);
+    if (!data->renderer) {
+        log_error("SDL_CreateRenderer Error: %s", SDL_GetError());
+        SDL_DestroyWindow(data->window);
+        memory_free(pool, data, MEMORY_TAG_PLATFORM);
+        SDL_Quit();
+        return ENGINE_FAILURE;
     }
 
-    *window = (PlatformWindow *)platform_memory_allocate(sizeof(PlatformWindow));
-    if (!*window) {
-        log_eror("Failed to allocate memory for PlatformWindow.");
-        SDL_DestroyWindow(sdlWindow);
-        return ENGINE_ERROR_ALLOCATION_FAILED;
-    }
+    data->isRunning = true;
+    platform->data = data;
 
-    (*window)->handle = sdlWindow;
-    log_info("SDL Window created: %s (%dx%d)", config->title, config->width, config->height);
+    log_info("SDL3 platform initialized successfully.");
     return ENGINE_SUCCESS;
 }
 
-ENGINE_API void platform_window_destroy(PlatformWindow *window) {
-    if (!window || !window->handle) {
-        log_error("Invalid window or handle.");
+/**
+ * @brief Shuts down the SDL3 platform.
+ *
+ * @param platform A pointer to the Platform structure.
+ * @return void
+ */
+static void sdl3_platform_shutdown(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_warning("sdl3_platform_shutdown called with invalid platform or data.");
         return;
     }
 
-    SDL_DestroyWindow(window->handle);
-    platform_memory_free(window);
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+
+    // Destroy renderer.
+    if (data->renderer) {
+        SDL_DestroyRenderer(data->renderer);
+    }
+
+    // Destroy window.
+    if (data->window) {
+        SDL_DestroyWindow(data->window);
+    }
+
+    // Quit SDL.
+    SDL_Quit();
+
+    // Free platform-specific data.
+    MemoryPool *pool = platform->memoryPool;
+    if (pool) {
+        memory_free(pool, data, MEMORY_TAG_PLATFORM);
+    }
+
+    platform->data = NULL;
+    log_info("SDL3 platform shutdown completed.");
 }
 
+/**
+ * @brief Polls SDL3 platform-specific events.
+ *
+ * @param platform A pointer to the Platform structure.
+ * @return void
+ */
+static void sdl3_platform_poll_events(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_warning("sdl3_platform_poll_events called with invalid platform or data.");
+        return;
+    }
+
+    SDL_Event event;
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+            case SDL_EVENT_QUIT: {
+                data->isRunning = false;
+            } break;
+
+            default: {
+            } break;
+        }
+    }
+}
+
+/**
+ * @brief Checks if the SDL3 platform should continue running.
+ *
+ * @param platform A pointer to the Platform structure.
+ * @return b8 True if the platform should continue running, otherwise false.
+ */
+static b8 sdl3_platform_is_running(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_warning("sdl3_platform_is_running called with invalid platform or data.");
+        return false;
+    }
+
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+    return data->isRunning;
+}
+
+/**
+ * @brief Gets the absolute time of the SDL3 platform in milliseconds.
+ *
+ * @param platform A pointer to the Platform structure.
+ * @return u64 representing the current absolute time.
+ */
+static u64 sdl3_platform_get_absolute_time(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_warning("sdl3_platform_get_absolute_time called with invalid platform or data.");
+        return 0;
+    }
+
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+    data->absoluteTime = SDL_GetTicks();
+    return data->absoluteTime;
+}
+
+#pragma endregion
 // =============================================================================
-#pragma region Renderer
+#pragma region Platform
 
-ENGINE_API EngineResult platform_renderer_create(
-    const PlatformRendererConfig *config,
-    PlatformWindow *window,
-    PlatformRenderer **renderer) {
-
-    if (!config || !window || !renderer) {
-        log_error("Invalid arguments provided to platform_renderer_create.");
+ENGINE_API EngineResult platform_init(Platform *platform, MemoryPool *pool) {
+    if (!platform || !pool) {
+        log_error("Invalid Platform or MemoryPool provided to platform_init.");
         return ENGINE_ERROR_INVALID_ARGUMENT;
     }
 
-    SDL_Renderer *sdlRenderer = SDL_CreateRenderer(
-        window->handle,
-        config->name);
+    // Assign function pointers.
+    platform->init = sdl3_platform_init;
+    platform->shutdown = sdl3_platform_shutdown;
+    platform->pollEvents = sdl3_platform_poll_events;
+    platform->isRunning = sdl3_platform_is_running;
+    platform->getAbsoluteTime = sdl3_platform_get_absolute_time;
 
-    if (!sdlRenderer) {
-        log_error("Failed to create SDL renderer: %s", SDL_GetError());
-        return ENGINE_FAILURE;
-    }
-
-    *renderer = (PlatformRenderer *)platform_memory_allocate(sizeof(PlatformRenderer));
-    if (!*renderer) {
-        log_error("Failed to allocate memory for PlatformRenderer.");
-        SDL_DestroyRenderer(sdlRenderer);
-        return ENGINE_ERROR_ALLOCATION_FAILED;
-    }
-
-    (*renderer)->handle = sdlRenderer;
-    log_info("SDL Renderer created.");
-    return ENGINE_SUCCESS;
+    // Initialize platform-specific data.
+    return platform->init(platform, pool);
 }
 
-ENGINE_API void platform_renderer_destroy(PlatformRenderer *renderer) {
-    if (!renderer) {
-        log_error("Invalid renderer provided to platform_renderer_destroy.");
+ENGINE_API void platform_shutdown(Platform *platform) {
+    if (!platform) {
+        log_error("Invalid Platform provided to platform_shutdown.");
         return;
     }
 
-    if (renderer->handle) {
-        SDL_DestroyRenderer(renderer->handle);
-        log_info("SDL Renderer destroyed.");
-    }
-
-    platform_memory_free(renderer);
+    platform->shutdown(platform);
 }
 
-ENGINE_API void platform_renderer_present(PlatformRenderer *renderer) {
-    if (!renderer || !renderer->handle) {
-        log_error("Invalid renderer provided to platform_renderer_present.");
+ENGINE_API void platform_poll_events(Platform *platform) {
+    if (!platform) {
+        log_error("Invalid Platform provided to platform_poll_events.");
         return;
     }
 
-    SDL_RenderPresent(renderer->handle);
+    platform->pollEvents(platform);
 }
 
-ENGINE_API void platform_renderer_set_draw_color(
-    PlatformRenderer *renderer,
-    u8 r, u8 g, u8 b, u8 a) {
-
-    if (!renderer || !renderer->handle) {
-        log_error("Invalid renderer provided to platform_renderer_set_draw_color.");
-        return;
+ENGINE_API b8 platform_is_running(Platform *platform) {
+    if (!platform) {
+        log_error("Invalid Platform provided to platform_is_running.");
+        return false;
     }
 
-    SDL_SetRenderDrawColor(renderer->handle, r, g, b, a);
+    return platform->isRunning(platform);
 }
 
-ENGINE_API void platform_renderer_clear(PlatformRenderer *renderer) {
-    if (!renderer || !renderer->handle) {
-        log_error("Invalid renderer provided to platform_renderer_clear.");
-        return;
+ENGINE_API u64 platform_get_absolute_time(Platform *platform) {
+    if (!platform) {
+        log_error("Invalid Platform provided to platform_get_absolute_time.");
+        return 0;
     }
 
-    SDL_RenderClear(renderer->handle);
+    return platform->getAbsoluteTime(platform);
 }
 
+#pragma endregion
 // =============================================================================
-#pragma region Timing
+#pragma region Renderer
 
-ENGINE_API u64 platform_get_absolute_time(void) {
-    return (u64)SDL_GetTicks();
+ENGINE_API void platform_renderer_clear(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_error("Invalid platform or platform data provided to platform_renderer_clear.");
+        return;
+    }
+
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+    if (!data->renderer) {
+        log_error("Invalid renderer handle provided to platform_renderer_clear.");
+        return;
+    }
+
+    SDL_RenderClear(data->renderer);
 }
 
+ENGINE_API void platform_renderer_present(Platform *platform) {
+    if (!platform || !platform->data) {
+        log_error("Invalid platform or platform data provided to platform_renderer_present.");
+        return;
+    }
+
+    SDL3_PlatformData *data = (SDL3_PlatformData *)platform->data;
+    if (!data->renderer) {
+        log_error("Invalid renderer handle provided to platform_renderer_present.");
+        return;
+    }
+
+    SDL_RenderPresent(data->renderer);
+}
+
+#pragma endregion
 // =============================================================================
 #pragma region Memory
 
@@ -179,27 +271,28 @@ ENGINE_API void platform_memory_free(void *block) {
     SDL_free(block);
 }
 
-ENGINE_API void *platform_memory_aligned_allocate(u64 size, u16 alignment) {
+ENGINE_API void *platform_memory_allocate_aligned(u64 size, u16 alignment) {
     return SDL_aligned_alloc(alignment, size);
 }
 
-ENGINE_API void platform_memory_aligned_free(void *block) {
+ENGINE_API void platform_memory_free_aligned(void *block) {
     SDL_aligned_free(block);
 }
 
-ENGINE_API *platform_memory_copy(void *dest, const void *src, u64 size) {
+ENGINE_API void *platform_memory_copy(void *dest, const void *src, u64 size) {
     return SDL_memcpy(dest, src, size);
 }
 
-ENGINE_API *platform_memory_set(void *dest, i32 value, u64 size) {
+ENGINE_API void *platform_memory_set(void *dest, i32 value, u64 size) {
     return SDL_memset(dest, value, size);
 }
 
-ENGINE_API *platform_memory_zero(void *block, u64 size) {
+ENGINE_API void *platform_memory_zero(void *block, u64 size) {
     ENGINE_UNUSED(size);
     return SDL_zero(block);
 }
 
+#pragma endregion
 // =============================================================================
 #pragma region Threading
 
@@ -228,6 +321,7 @@ ENGINE_API void platform_mutex_unlock(void *lock) {
     SDL_UnlockMutex((SDL_Mutex *)lock);
 }
 
+#pragma endregion
 // =============================================================================
 #pragma region Dynamic Library
 
@@ -244,3 +338,6 @@ ENGINE_API void *platform_dynamic_library_load_function(
     const char *symbol) {
     return SDL_LoadFunction(library, symbol);
 }
+
+#pragma endregion
+// =============================================================================

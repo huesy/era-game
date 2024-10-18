@@ -14,122 +14,127 @@
 #define ENGINE_PLATFORM_H
 
 #include "engine/defines.h"
+#include "engine/memory.h"
+#include "engine/window.h"
 
-// Forward declrations for platform-specific handles.
-typedef struct PlatformWindow PlatformWindow;
-typedef struct PlatformRenderer PlatformRenderer;
+// =============================================================================
+#pragma region Types
 
-// Platform Configuration
-typedef struct PlatformWindowConfig {
-    const char *title; /**< The title of the window to create. */
-    i32 x;             /**< The x position of the window to create. */
-    i32 y;             /**< The y position of the window to create. */
-    i32 width;         /**< The width of the window to create. */
-    i32 height;        /**< The height of the window to create. */
-    b8 fullScreen;     /**< True if the window should be created in full screen mode. */
-} PlatformWindowConfig;
+// Forward declaration.
+typedef struct Platform Platform;
+typedef struct Renderer Renderer;
 
-typedef struct PlatformRendererConfig {
-    // TODO: Add renderer-specific configuration...
-    const char *name;
-} PlatformRendererConfig;
+/**
+ * @brief Function pointer types for platform abstraction.
+ */
+typedef EngineResult (*PlatformInitFunc)(Platform *platform, MemoryPool *pool);
+typedef void (*PlatformShutdownFunc)(Platform *platform);
+typedef void (*PlatformPollEventsFunc)(Platform *platform);
+typedef b8 (*PlatformIsRunningFunc)(Platform *platform);
+typedef u64 (*PlatformGetAbsoluteTimeFunc)(Platform *platform);
 
+/**
+ * @brief Platform abstraction structure.
+ */
+typedef struct Platform {
+    Window *window;                              /**< Pointer to the window instance. */
+    Renderer *renderer;                          /**< Pointer to the renderer instance. */
+    MemoryPool *memoryPool;                      /**< Pointer to the memory pool instance. */
+    void *data;                                  /**< Pointer to platform-specific data. */
+    PlatformInitFunc init;                       /**< Function pointer to initialize the platform. */
+    PlatformShutdownFunc shutdown;               /**< Function pointer to shutdown the platform. */
+    PlatformPollEventsFunc pollEvents;           /**< Function pointer to poll events. */
+    PlatformIsRunningFunc isRunning;             /**< Function pointer to check if the platform is running. */
+    PlatformGetAbsoluteTimeFunc getAbsoluteTime; /**< Function pointer to get the absolute time. */
+} Platform;
+
+#pragma endregion
 // =============================================================================
 #pragma region Platform
 
 /**
  * @brief Initializes the platform.
  *
+ * @param platform A pointer to the Platform structure.
+ * @param pool A pointer to the memory pool structure.
  * @return ENGINE_SUCCESS if the platform was initialized successfully, otherwise an error code.
  */
-ENGINE_API EngineResult platform_init(void);
+ENGINE_API EngineResult platform_init(Platform *platform, MemoryPool *pool);
 
 /**
  * @brief Shuts down the platform.
  *
+ * @param platform A pointer to the Platform structure.
  * @return void
  */
-ENGINE_API void platform_shutdown(void);
-
-// =============================================================================
-#pragma region Window
+ENGINE_API void platform_shutdown(Platform *platform);
 
 /**
- * @brief Creates a window.
+ * @brief Polls platform-specific events.
  *
- * @param config A pointer to the window configuration structure.
- * @param window A double pointer to the window to create.
- * @return ENGINE_SUCCESS if the window was created successfully, otherwise an error code.
- */
-ENGINE_API EngineResult platform_window_create(const PlatformWindowConfig *config, PlatformWindow **window);
-
-/**
- * @brief Destroys a window.
- *
- * @param window A pointer to the window to destroy.
+ * @param platform A pointer to the Platform structure.
  * @return void
  */
-ENGINE_API void platform_window_destroy(PlatformWindow *window);
-
-// =============================================================================
-#pragma region Renderer
+ENGINE_API void platform_poll_events(Platform *platform);
 
 /**
- * @brief Creates a renderer.
+ * @brief Check if the platform should continue running.
  *
- * @param config A pointer to the renderer configuration structure.
- * @param window A pointer to the window to create the renderer on.
- * @param renderer A double pointer to the renderer to create.
- * @return ENGINE_SUCCESS if the renderer was created successfully, otherwise an error code.
+ * @param platform A pointer to the Platform structure.
+ * @return b8 True if the platform should continue running, otherwise false.
  */
-ENGINE_API EngineResult platform_renderer_create(const PlatformRendererConfig *config, PlatformWindow *window, PlatformRenderer **renderer);
-
-/**
- * @brief Destroys a renderer.
- *
- * @param renderer A pointer to the renderer to destroy.
- * @return void
- */
-ENGINE_API void platform_renderer_destroy(PlatformRenderer *renderer);
-
-/**
- * @brief Sets the draw color for the renderer.
- *
- * @param renderer A pointer to the renderer to set the draw color on.
- * @return void
- */
-ENGINE_API void platform_renderer_present(PlatformRenderer *renderer);
-
-/**
- * @brief Sets the draw color for the renderer.
- *
- * @param renderer A pointer to the renderer to set the draw color on.
- * @param r The red component of the color.
- * @param g The green component of the color.
- * @param b The blue component of the color.
- * @param a The alpha component of the color.
- * @return void
- */
-ENGINE_API void platform_renderer_set_draw_color(PlatformRenderer *renderer, u8 r, u8 g, u8 b, u8 a);
-
-/**
- * @brief Clears the renderer.
- *
- * @param renderer A pointer to the renderer to clear.
- * @return void
- */
-ENGINE_API void platform_renderer_clear(PlatformRenderer *renderer);
-
-// =============================================================================
-#pragma region Timing
+ENGINE_API b8 platform_is_running(Platform *platform);
 
 /**
  * @brief Gets the absolute time in seconds.
  *
+ * @param platform A pointer to the Platform structure.
  * @return The absolute time in seconds.
  */
-ENGINE_API u64 platform_get_absolute_time(void);
+ENGINE_API u64 platform_get_absolute_time(Platform *platform);
 
+#pragma endregion
+// =============================================================================
+// #pragma region Window
+
+// /**
+//  * @brief Creates a window.
+//  *
+//  * @param config A pointer to the window configuration structure.
+//  * @param window A double pointer to the window to create.
+//  * @return ENGINE_SUCCESS if the window was created successfully, otherwise an error code.
+//  */
+// ENGINE_API EngineResult platform_window_create(const PlatformWindowConfig *config, PlatformWindow **window);
+
+// /**
+//  * @brief Destroys a window.
+//  *
+//  * @param window A pointer to the window to destroy.
+//  * @return void
+//  */
+// ENGINE_API void platform_window_destroy(PlatformWindow *window);
+
+// #pragma endregion
+// // =============================================================================
+#pragma region Renderer
+
+/**
+ * @brief Clears the renderer using the platform.
+ *
+ * @param platform A pointer to the platform to clear the renderer on.
+ * @return void
+ */
+ENGINE_API void platform_renderer_clear(Platform *platform);
+
+/**
+ * @brief Presents the renderer using the platform.
+ *
+ * @param platform A pointer to the platform to present the renderer on.
+ * @return void
+ */
+ENGINE_API void platform_renderer_present(Platform *platform);
+
+#pragma endregion
 // =============================================================================
 #pragma region Memory
 
@@ -156,7 +161,7 @@ ENGINE_API void platform_memory_free(void *block);
  * @param alignment The alignment of the memory to allocate.
  * @return A pointer to the allocated memory.
  */
-ENGINE_API void *platform_memory_aligned_allocate(u64 size, u16 alignment);
+ENGINE_API void *platform_memory_allocate_aligned(u64 size, u16 alignment);
 
 /**
  * @brief Frees aligned memory.
@@ -164,7 +169,7 @@ ENGINE_API void *platform_memory_aligned_allocate(u64 size, u16 alignment);
  * @param block A pointer to the memory to free.
  * @return void
  */
-ENGINE_API void platform_memory_aligned_free(void *block);
+ENGINE_API void platform_memory_free_aligned(void *block);
 
 /**
  * @brief Copies memory.
@@ -195,6 +200,7 @@ ENGINE_API void *platform_memory_set(void *dest, i32 value, u64 size);
  */
 ENGINE_API void *platform_memory_zero(void *block, u64 size);
 
+#pragma endregion
 // =============================================================================
 #pragma region Threading
 
@@ -230,34 +236,38 @@ ENGINE_API void platform_mutex_lock(void *lock);
  */
 ENGINE_API void platform_mutex_unlock(void *lock);
 
+#pragma endregion
 // =============================================================================
-#pragma region Shared Library
+// #pragma region Shared Library
 
-/**
- * @brief Loads a dynamic library.
- *
- * @param path The path to the dynamic library to load.
- * @return A pointer to the loaded dynamic library.
- */
-ENGINE_API void *platform_dynamic_library_load(const char *path);
+// /**
+//  * @brief Loads a dynamic library.
+//  *
+//  * @param path The path to the dynamic library to load.
+//  * @return A pointer to the loaded dynamic library.
+//  */
+// ENGINE_API void *platform_dynamic_library_load(const char *path);
 
-/**
- * @brief Unloads a dynamic library.
- *
- * @param library A pointer to the dynamic library to unload.
- * @return void
- */
-ENGINE_API void platform_dynamic_library_unload(void *library);
+// /**
+//  * @brief Unloads a dynamic library.
+//  *
+//  * @param library A pointer to the dynamic library to unload.
+//  * @return void
+//  */
+// ENGINE_API void platform_dynamic_library_unload(void *library);
 
-/**
- * @brief Loads a function from a dynamic library.
- *
- * @param library A pointer to the dynamic library to load the function from.
- * @param symbol The name of the function to load.
- * @return A pointer to the loaded function.
- */
-ENGINE_API void *platform_dynamic_library_load_function(
-    void *library,
-    const char *symbol);
+// /**
+//  * @brief Loads a function from a dynamic library.
+//  *
+//  * @param library A pointer to the dynamic library to load the function from.
+//  * @param symbol The name of the function to load.
+//  * @return A pointer to the loaded function.
+//  */
+// ENGINE_API void *platform_dynamic_library_load_function(
+//     void *library,
+//     const char *symbol);
+
+// #pragma endregion
+// // =============================================================================
 
 #endif // ENGINE_PLATFORM_H

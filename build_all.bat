@@ -22,7 +22,7 @@ if "%ACTION%" == "build" (
 )
 
 if "%PLATFORM%" == "windows" (
-    SET ENGINE_LINK=-luser32 -lOpenGL32
+    SET ENGINE_LINK=-luser32
     SET PLATFORM_DIR=windows
 ) else (
     if "%PLATFORM%" == "linux" (
@@ -47,8 +47,8 @@ ECHO %ACTION_STR% everything on %PLATFORM% (%TARGET%)...
 IF NOT EXIST build (mkdir build)
 IF NOT EXIST build\%PLATFORM_DIR% (mkdir build\%PLATFORM_DIR%)
 IF NOT EXIST build\%PLATFORM_DIR%\bin (mkdir build\%PLATFORM_DIR%\bin)
-copy /Y libs\sdl3.dll build\%PLATFORM_DIR%\bin\
-copy /Y libs\sdl3.lib build\%PLATFORM_DIR%\bin\
+copy /Y libs\SDL3.dll build\%PLATFORM_DIR%\bin\
+copy /Y libs\SDL3.lib build\%PLATFORM_DIR%\bin\
 
 
 @REM --------------------------------------------------------------------------
@@ -56,27 +56,31 @@ copy /Y libs\sdl3.lib build\%PLATFORM_DIR%\bin\
 @REM --------------------------------------------------------------------------
 
 REM Engine core library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin %ENGINE_LINK% -lgdi32 -lsdl3"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=engine-lib OUTPUT=engine PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin %ENGINE_LINK% -lgdi32 -lSDL3" DYNAMIC=1
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Game library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin -lengine"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game-lib OUTPUT=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild/%PLATFORM_DIR%/bin -lengine" DYNAMIC=1
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 REM Editor library
-make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine"
+make -j -f Makefile.lib.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor-lib OUTPUT=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine" DYNAMIC=1
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 @REM --------------------------------------------------------------------------
 @REM Executables
 @REM --------------------------------------------------------------------------
 
-REM Editor
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine -leditor -lgame"
+REM Editor Executable (no linking against dynamic libraries)
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=editor PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lgdi32 -lsdl3 -lengine"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
-REM Game
-make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine -lgame"
+REM Game Executable (no linking against dynamic libraries)
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=game PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lgdi32 -lsdl3 -lengine"
+IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
+
+REM Tests Executable
+make -j -f Makefile.exe.mak %ACTION% TARGET=%TARGET% ASSEMBLY=tests PLATFORM=%PLATFORM_DIR% LDFLAGS="-Lbuild\%PLATFORM_DIR%\bin -lengine -lgame -leditor"
 IF %ERRORLEVEL% NEQ 0 (echo Error:%ERRORLEVEL% && exit /b %ERRORLEVEL%)
 
 ECHO All assemblies %ACTION_STR_PAST% successfully.

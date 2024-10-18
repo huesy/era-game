@@ -29,7 +29,8 @@
     "ecs.h": "c",
     "platform.h": "c",
     "__config": "c",
-    "_ptrdiff_t.h": "c"
+    "_ptrdiff_t.h": "c",
+    "renderer.h": "c"
   },
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "ms-vscode.cpptools",

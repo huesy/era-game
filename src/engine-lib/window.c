@@ -1,58 +1,42 @@
 #include "engine/window.h"
+#include "engine/logging.h"
 #include "engine/platform.h"
 
-ENGINE_API EngineResult
-window_create(WindowConfig *config, Window *window, Platform *platform) {
-    if (!config) {
-        log_error("Invalid window configuration.");
-        return ENGINE_FAILURE;
+ENGINE_API EngineResult window_init(MemoryPool *pool, const WindowConfig *config, Window *window) {
+    if (!pool || !config || !window) {
+        log_error("Invalid MemoryPool, WindowConfig, or Window provided to window_create.");
+        return ENGINE_ERROR_INVALID_ARGUMENT;
     }
 
-    if (!window) {
-        log_error("Invalid window.");
-        return ENGINE_FAILURE;
-    }
+    // Assign configuration.
+    window->config = *config;
 
-    if (!platform) {
-        log_error("Invalid platform.");
-        return ENGINE_FAILURE;
-    }
+    // TODO:
+    // Platform-specific window handle is already created in the platform-specific code.
+    // Therefore, no additional initialization is required here.
+    // Alternatively, we can retrieve the window handle from the Platform struct.
+    // For simplicity, we'll assume it's already handled.
 
-    if (!platform->createWindow) {
-        log_error("Platform does not support window creation.");
-        return ENGINE_FAILURE;
-    }
-
-    PlatformWindowConfig platformConfig = {0};
-    platformConfig.title = config->title;
-    platformConfig.width = config->width;
-    platformConfig.height = config->height;
-    platformConfig.fullScreen = config->fullScreen;
-
-    if (platform->createWindow(&platformConfig, window->platformWindow) != ENGINE_SUCCESS) {
-        log_error("Failed to create window.");
-        return ENGINE_FAILURE;
-    }
+    log_info("Window initialized: %s [%dx%d] at (%d, %d). Fullscreen: %s",
+             window->config.title,
+             window->config.width,
+             window->config.height,
+             window->config.x,
+             window->config.y,
+             window->config.fullScreen ? "true" : "false");
 
     return ENGINE_SUCCESS;
 }
 
-ENGINE_API void
-window_destroy(Window *window, Platform *platform) {
-    if (!window) {
-        log_error("Invalid window.");
+ENGINE_API void window_shutdown(MemoryPool *pool, Window *window) {
+    if (!pool || !window) {
+        log_error("Invalid MemoryPool or Window provided to window_destroy.");
         return;
     }
 
-    if (!platform) {
-        log_error("Invalid platform.");
-        return;
-    }
+    // TODO:
+    // Platform-specific window handle is destroyed in the platform-specific code.
+    // Therefore, no additional shutdown is needed here.
 
-    if (!platform->destroyWindow) {
-        log_error("Platform does not support window destruction.");
-        return;
-    }
-
-    platform->destroyWindow(window->platformWindow);
+    log_info("Window shutdown: %s", window->config.title);
 }

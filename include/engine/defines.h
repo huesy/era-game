@@ -148,7 +148,8 @@ typedef enum EngineResult {
 #define INVALID_ID_U32 MAX_U32
 #define INVALID_ID_U64 MAX_U64
 
-// Memory macros
+// =============================================================================
+#pragma region Memory
 
 #include <memory.h>
 

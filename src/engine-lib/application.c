@@ -1,71 +1,57 @@
 #include "engine/application.h"
+#include "engine/engine.h"
 #include "engine/logging.h"
 #include "engine/memory.h"
 #include "engine/platform.h"
+#include "engine/window.h"
 
-ENGINE_API EngineResult application_create(const ApplicationConfig *config, Application *app) {
-    if (!config) {
-        log_error("Invalid ApplicationConfig provided.");
+ENGINE_API EngineResult application_init(Engine *engine, const ApplicationConfig *config, Application *app) {
+    if (!engine || !config || !app) {
+        log_error("Invalid Engine, ApplicationConfig, or Application provided to application_init.");
         return ENGINE_ERROR_INVALID_ARGUMENT;
     }
 
-    if (!app) {
-        log_error("Invalid Application pointer.");
-        return ENGINE_ERROR_INVALID_ARGUMENT;
-    }
+    // Assign memory pool and platform from the engine.
+    app->memoryPool = &engine->memoryPool;
+    app->platform = &engine->platform;
 
-    // Initialize the platform.
-    app->platform = (Platform *)memory_allocate(sizeof(Platform), MEMORY_TAG_PLATFORM);
-    if (!app->platform) {
-        log_error("Failed to allocate memory for platform.");
-        return ENGINE_ERROR_ALLOCATION_FAILED;
-    }
-
-    if (platform_init() != ENGINE_SUCCESS) {
-        log_error("Failed to initialize platform.");
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
-        return ENGINE_FAILURE;
-    }
-
-    // Create window.
-    app->window = (Window *)memory_allocate(sizeof(Window), MEMORY_TAG_PLATFORM);
+    // Allocate memory for the window.
+    app->window = (Window *)memory_allocate(app->memoryPool, sizeof(Window), MEMORY_TAG_PLATFORM);
     if (!app->window) {
         log_error("Failed to allocate memory for window.");
-        platform_shutdown();
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
         return ENGINE_ERROR_ALLOCATION_FAILED;
     }
 
-    if (platform_window_create(&config->window, &app->window->platformWindow) != ENGINE_SUCCESS) {
-        log_error("Failed to create window.");
-        memory_free(app->window, MEMORY_TAG_PLATFORM);
-        platform_shutdown();
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
+    // Initialize the window.
+    if (window_init(app->memoryPool, &config->window, app->window) != ENGINE_SUCCESS) {
+        log_error("Failed to initialize window.");
+        memory_free(app->memoryPool, app->window, MEMORY_TAG_PLATFORM);
         return ENGINE_FAILURE;
     }
 
-    // Create Renderer.
-    app->renderer = (Renderer *)memory_allocate(sizeof(Renderer), MEMORY_TAG_RENDERER);
+    // Allocate memory for the renderer.
+    app->renderer = (Renderer *)memory_allocate(app->memoryPool, sizeof(Renderer), MEMORY_TAG_RENDERER);
     if (!app->renderer) {
         log_error("Failed to allocate memory for renderer.");
-        platform_window_destroy(app->window->platformWindow);
-        memory_free(app->window, MEMORY_TAG_PLATFORM);
-        platform_shutdown();
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
+        window_shutdown(app->memoryPool, app->window);
+        memory_free(app->memoryPool, app->window, MEMORY_TAG_PLATFORM);
         return ENGINE_ERROR_ALLOCATION_FAILED;
     }
 
-    if (platform_renderer_create(&config->renderer, app->window->platformWindow, &app->renderer->platformRenderer) != ENGINE_SUCCESS) {
-        log_error("Failed to create renderer.");
-        memory_free(app->renderer, MEMORY_TAG_RENDERER);
-        platform_window_destroy(app->window->platformWindow);
-        memory_free(app->window, MEMORY_TAG_PLATFORM);
-        platform_shutdown();
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
+    // Initialize the renderer.
+    if (renderer_init(app->memoryPool, &config->renderer, app->renderer, app->platform) != ENGINE_SUCCESS) {
+        log_error("Failed to initialize renderer.");
+        memory_free(app->memoryPool, app->renderer, MEMORY_TAG_RENDERER);
+        window_shutdown(app->memoryPool, app->window);
+        memory_free(app->memoryPool, app->window, MEMORY_TAG_PLATFORM);
         return ENGINE_FAILURE;
     }
 
-    log_info("Application created successfully.");
+    // Store user callbacks.
+    app->update = config->update;
+    app->render = config->render;
+
+    log_info("Application initialized successfully.");
     return ENGINE_SUCCESS;
 }
 
@@ -75,20 +61,27 @@ ENGINE_API void application_run(Application *app) {
         return;
     }
 
-    b8 isRunning = true;
+    log_info("Starting application run loop.");
 
-    while (isRunning) {
-        // Poll events.
-        platform_poll_events();
+    while (platform_is_running(app->platform)) {
+        // Poll platform-specific events.
+        platform_poll_events(app->platform);
 
-        // Check if the window is still open.
-        if (!platform_window_is_open(app->window->platformWindow)) {
-            isRunning = false;
+        // Calculate deltaTime.
+        static u64 lastTime = 0;
+        u64 currentTime = platform_get_absolute_time(app->platform);
+        f32 deltaTime = (f32)(currentTime - lastTime) * 0.001f; // Convert to milliseconds.
+        lastTime = currentTime;
+
+        // Update logic.
+        if (app->update) {
+            app->update(deltaTime);
         }
 
-        // Update and render the editor.
-        editor_update(0.016f); // Assuming ~60 FPS.
-        editor_render();
+        // Render.
+        if (app->render) {
+            app->render();
+        }
 
         // Clear the renderer.
         renderer_clear(app->renderer, app->platform);
@@ -97,31 +90,25 @@ ENGINE_API void application_run(Application *app) {
         renderer_present(app->renderer, app->platform);
     }
 
-    log_info("Application run loop exited.");
+    log_info("Exiting application run loop.");
 }
 
 ENGINE_API void application_shutdown(Application *app) {
     if (!app) {
-        log_error("Invalid Application provided to application_shutdown.");
+        log_error("Invalid Application pointer provided to application_shutdown.");
         return;
     }
 
-    // Destroy Renderer.
+    // Shutdown Renderer.
     if (app->renderer) {
-        platform_renderer_destroy(app->renderer->platformRenderer);
-        memory_free(app->renderer, MEMORY_TAG_RENDERER);
+        renderer_shutdown(app->renderer, app->platform);
+        memory_free(app->memoryPool, app->renderer, MEMORY_TAG_RENDERER);
     }
 
-    // Destroy Window.
+    // Shutdown Window.
     if (app->window) {
-        platform_window_destroy(app->window->platformWindow);
-        memory_free(app->window, MEMORY_TAG_PLATFORM);
-    }
-
-    // Shutdown Platform.
-    if (app->platform) {
-        platform_shutdown();
-        memory_free(app->platform, MEMORY_TAG_PLATFORM);
+        window_shutdown(app->memoryPool, app->window);
+        memory_free(app->memoryPool, app->window, MEMORY_TAG_PLATFORM);
     }
 
     log_info("Application shutdown completed.");

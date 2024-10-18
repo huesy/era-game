@@ -70,15 +70,22 @@ fi
 # Executables
 # --------------------------------------------------------------------------
 
-# Editor
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine -leditor"
+# Editor Executable (No linking against dynamic libraries)
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=editor PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lSDL3"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?
 fi
 
-# Game
-make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine -lgame"
+# Game Executable (No linking against dynamic libraries)
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=game PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lSDL3"
+if [ $? -ne 0 ]; then
+    echo "Error: $?"
+    exit $?
+fi
+
+# Tests Executable
+make -j -f Makefile.exe.mak $ACTION TARGET=$TARGET ASSEMBLY=tests PLATFORM=$PLATFORM_DIR LDFLAGS="-Lbuild/$PLATFORM_DIR/bin -lengine -lgame -leditor"
 if [ $? -ne 0 ]; then
     echo "Error: $?"
     exit $?

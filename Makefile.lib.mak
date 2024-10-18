@@ -75,11 +75,16 @@ LOGFILE = $(BUILDDIR)/build_log.txt
 ifeq ($(OS),Windows_NT)
     # Windows
     PLATFORM := windows
-    EXTENSION := dll
     PREFIX := 
     SHELL := cmd.exe
+    ifeq ($(DYNAMIC),1)
+        EXTENSION := dll
+    else
+        EXTENSION := lib
+    endif
+
         
-    _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+    _LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
     _CFLAGS +=
     _LDFLAGS += -L$(OBJDIR) -shared
@@ -97,10 +102,15 @@ else
     ifeq ($(OS),Linux)
         # Linux
         PLATFORM := linux
-        EXTENSION := so
         PREFIX := lib
+        ifeq ($(DYNAMIC),1)
+            EXTENSION := so
+        else
+            EXTENSION := a
+        endif
 
-        _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+
+        _LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
         _CFLAGS += -fPIC
         _LDFLAGS += -L./$(OBJDIR) -shared
@@ -117,10 +127,14 @@ else
     ifeq ($(OS),Darwin)
         # MacOS
         PLATFORM := macos
-        EXTENSION := dylib
         PREFIX := lib
+        ifeq ($(DYNAMIC),1)
+            EXTENSION := dylib
+        else
+            EXTENSION := a
+        endif
 
-        _DYNAMIC_LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
+        _LIB := $(BINDIR)/$(PREFIX)$(OUTPUT).$(EXTENSION)
 
         _CFLAGS += -fPIC -ObjC
         _LDFLAGS += -L./$(OBJDIR) -shared -dynamiclib -install_name @rpath/$(PREFIX)$(OUTPUT).$(EXTENSION) -lobjc -framework Cocoa
@@ -147,19 +161,19 @@ scaffold:
 
 .PHONY: link
 link: scaffold $(OBJFILES)
-	@$(ECHO) Linking '$(_DYNAMIC_LIB)'...
-	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(_DYNAMIC_LIB)
-	@$(ECHO) Compiled '$(_DYNAMIC_LIB)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
+	@$(ECHO) Linking '$(_LIB)'...
+	@$(CC) $(OBJFILES) $(_LDFLAGS) -o $(_LIB)
+	@$(ECHO) Compiled '$(_LIB)' as a '$(PLATFORM)' library with flags: $(_CFLAGS) $(_LDFLAGS) > $(LOGFILE)
 
 .PHONY: compile
 compile:
-	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(_DYNAMIC_LIB)' build ---
+	@$(ECHO) --- Performing '$(ASSEMBLY)' '$(_LIB)' build ---
 -include $(OBJFILES:.o=.d)
 
 .PHONY: clean
 clean:
 	@$(ECHO) --- Cleaning '$(ASSEMBLY)' ---
-	@$(call DEL,$(_DYNAMIC_LIB))
+	@$(call DEL,$(_LIB))
 ifeq ($(PLATFORM),windows)
 	@$(call DEL,$(BINDIR)/$(PREFIX)$(OUTPUT).*)
 endif

@@ -1,59 +1,57 @@
 #include "engine/engine.h"
+#include "engine/application.h"
 #include "engine/logging.h"
 
-ENGINE_API EngineResult engine_init(const EngineConfig *config, Application *app) {
-    if (!config || !app) {
-        log_error("Invalid arguments to engine_init.");
+ENGINE_API EngineResult engine_init(const EngineConfig *config, Engine *engine) {
+    if (!config || !engine) {
+        log_error("Invalid EngineConfig or Engine provided to engine_init.");
         return ENGINE_ERROR_INVALID_ARGUMENT;
     }
 
     // Initialize the memory pool.
-    if (memory_pool_init(config->memoryPoolSize) != ENGINE_SUCCESS) {
+    if (memory_pool_init(&engine->memoryPool, config->memoryPoolSize) != ENGINE_SUCCESS) {
         log_error("Memory pool initialization failed.");
         return ENGINE_FAILURE;
     }
 
-    // Window config
-    // TODO: Give this to the binary to set.
-    WindowConfig windowConfig = {0};
-    windowConfig.title = "Era Engine";
-    windowConfig.width = 1280;
-    windowConfig.height = 720;
-    windowConfig.fullScreen = false;
-
-    // Renderer config.
-    // TODO: Give this to the binary to set.
-    RendererConfig rendererConfig = {0};
-    rendererConfig.name = "SDL3";
-
-    // Define application configuration.
-    ApplicationConfig appConfig = {0};
-    appConfig.window = windowConfig;
-    appConfig.renderer = rendererConfig;
-
-    // Create the application.
-    if (application_create(&appConfig, app) != ENGINE_SUCCESS) {
-        log_error("Failed to create Application.");
-        memory_pool_shutdown();
+    // Initialize the platform.
+    if (platform_init(&engine->platform, &engine->memoryPool) != ENGINE_SUCCESS) {
+        log_error("Platform initialization failed.");
+        memory_pool_shutdown(&engine->memoryPool);
         return ENGINE_FAILURE;
     }
+
+    // TODO: Initialize other systems as needed.
+    // e.g. renderer, audio, input, physics, etc.
 
     log_info("Engine initialized successfully.");
     return ENGINE_SUCCESS;
 }
 
-void engine_shutdown(void) {
-    log_info("Shutting down engine...");
-    platform_shutdown();
-}
-
-void engine_run(void) {
-    log_info("Running engine...");
-
-    while (platform_is_running()) {
-        platform_poll_events();
-        // TODO: Additional game loop logic here.
+ENGINE_API void engine_shutdown(Engine *engine) {
+    if (!engine) {
+        log_error("Invalid Engine provided to engine_shutdown.");
+        return;
     }
 
-    log_info("Engine stopped.");
+    // TODO: Shutdown other systems as needed.
+    // e.g. renderer, audio, input, physics, etc.
+
+    // Shut down platform.
+    platform_shutdown(&engine->platform);
+
+    // Shut down memory pool.
+    memory_pool_shutdown(&engine->memoryPool);
+
+    log_info("Engine shutdown completed.");
+}
+
+ENGINE_API void engine_run(Engine *engine, Application *app) {
+    if (!engine || !app) {
+        log_error("Invalid Engine or Application provided to engine_run.");
+        return;
+    }
+
+    log_info("Running engine...");
+    application_run(app);
 }

@@ -12,42 +12,61 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include "application.h"
-#include "defines.h"
+#include "engine/defines.h"
+#include "engine/memory.h"
+#include "engine/platform.h"
+
+// Forward declarations.
+typedef struct Engine Engine;
+typedef struct EngineConfig EngineConfig;
+typedef struct Application Application;
 
 // =============================================================================
-#pragma region Constants
 
+/**
+ * @brief Configuration structure for initializing the engine.
+ */
 typedef struct EngineConfig {
-    u64 memoryPoolSize;
+    u64 memoryPoolSize; /**< Size of the memory pool in bytes. */
+    // TODO: Other configuration params as needed.
 } EngineConfig;
+
+/**
+ * @brief State structure for the engine, encapsulating all major systems.
+ */
+typedef struct Engine {
+    MemoryPool memoryPool; /**< Memory pool for allocations. */
+    Platform platform;     /**< Platform interface. */
+    // TODO: Add other core systems (i.e. renderer, audio, input, physics, etc.).
+} Engine;
 
 // =============================================================================
 #pragma region Interface
 
 /**
- * @brief Initializes the engine.
+ * @brief Initializes the engine with the given configuration.
  *
- * @param config Engine configuration.
- * @param app A pointer to the Application struct to initialize.
+ * @param config A pointer to the configuration parameters for the engine.
+ * @param engine A pointer to the Engine structure to initialize.
  * @return ENGINE_SUCCESS if the engine was initialized successfully, otherwise an error code.
  */
-ENGINE_API EngineResult engine_init(const EngineConfig *config, Application *app);
+ENGINE_API EngineResult engine_init(const EngineConfig *config, Engine *engine);
 
 /**
- * @brief Shuts down the engine and cleans up resources.
+ * @brief Shuts down the engine and frees all resources.
  *
- * @param app A pointer to the Application struct to shut down.
+ * @param engine A pointer to the Engine state.
  * @return void
  */
-ENGINE_API void engine_shutdown(Application *app);
+ENGINE_API void engine_shutdown(Engine *engine);
 
 /**
  * @brief Runs the main engine update loop.
  *
+ * @param engine A pointer to the Engine struct to run.
  * @param app A pointer to the Application struct to run.
  * @return void
  */
-ENGINE_API void engine_run(Application *app);
+ENGINE_API void engine_run(Engine *engine, Application *app);
 
 #endif // ENGINE_H
